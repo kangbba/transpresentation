@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:transpresentation/sayne_dialogs.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -45,12 +48,8 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // TODO: Implement signup logic
-              },
-              child: Text('Sign up'),
-            ),
+
+            _signUpBtn(context),
             SizedBox(height: 20),
             TextButton(
               onPressed: () {
@@ -75,5 +74,41 @@ class _SignupScreenState extends State<SignupScreen> {
         ),
       ),
     );
+  }
+
+  ElevatedButton _signUpBtn(BuildContext context) {
+    return ElevatedButton(
+            onPressed: () async {
+              String email = _emailController.text.trim();
+              String pw = _passwordController.text.trim();
+              String cpw = _confirmPasswordController.text.trim();
+              if(pw != cpw){
+                Fluttertoast.showToast(msg: 'confirm 비밀번호가 올바르지 않음');
+                return;
+              }
+              sayneLoadingDialog(context, "회원가입 시도");
+              try {
+                UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                  email: email,
+                  password: pw,
+                );
+                Fluttertoast.showToast(msg: 'User ${userCredential.user?.uid} signed up success');
+                Navigator.pop(context);
+              }
+              on FirebaseAuthException catch (e) {
+                if (e.code == 'weak-password') {
+                  Fluttertoast.showToast(msg: 'The password provided is too weak.');
+                } else if (e.code == 'email-already-in-use') {
+                  Fluttertoast.showToast(msg: 'The account already exists for that email.');
+                }
+              } catch (e) {
+                print(e);
+              }
+              finally{
+                Navigator.pop(context);
+              }
+            },
+            child: Text('Sign up'),
+          );
   }
 }
