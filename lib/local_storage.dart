@@ -19,7 +19,7 @@ class LocalStorage {
   static Future<bool> getRememberMeLocal() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool? rememberMe = prefs.getBool("${_keyRememberMe}_$buildNumber");
-    return rememberMe ?? false;
+    return rememberMe ?? true;
   }
 
   static Future<void> setRememberMeLocal(bool value) async {

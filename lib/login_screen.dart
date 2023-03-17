@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final authScreenControl = AuthScreenControl.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -45,67 +46,85 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Padding(
-        padding: const EdgeInsets.all(64.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: 'Email',
-              ),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                labelText: 'Password',
-              ),
-            ),
-            FutureBuilder<bool>(
-              future: LocalStorage.getRememberMeLocal(),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return CheckboxListTile(
-                    title: Text("아이디 기억하기"),
-                    value: snapshot.data!,
-                    onChanged: (value) async {
-                      await LocalStorage.setRememberMeLocal(value!);
-                      setState(() {
+        padding: const EdgeInsets.all(32.0),
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Email',
+                  ),
+                ),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                      icon: Icon(_obscurePassword ? Icons.visibility : Icons.visibility_off, color: Colors.black38,),
+                    ),
+                  ),
+                ),
+                FutureBuilder<bool>(
+                  future: LocalStorage.getRememberMeLocal(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return CheckboxListTile(
+                        title: Text("아이디 기억하기"),
+                        value: snapshot.data!,
+                        onChanged: (value) async {
+                          await LocalStorage.setRememberMeLocal(value!);
+                          setState(() {
 
-                      });
-                    },
-                  );
-                } else {
-                  return CircularProgressIndicator();
-                }
-              },
+                          });
+                        },
+                      );
+                    } else {
+                      return CircularProgressIndicator();
+                    }
+                  },
+                ),
+                SizedBox(height: 20),
+                _standardLogInBtn(),
+                SizedBox(height: 20),
+                _googleLogInBtn(),
+                TextButton(
+                  onPressed: () {
+                    // TODO: Implement Facebook login logic
+                  },
+                  child: Text('Login with Facebook'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Switch to the Signup screen
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()))
+                        .then((data) async {
+                      if (data != null) {
+                        String email = data['email'];
+                        String password = data['password'];
+                        _emailController.text = email;
+                        _passwordController.text = password;
+                        _obscurePassword = true;
+                        bool rememberMe = await LocalStorage.getRememberMeLocal();
+                        await onPressedSignInStandard(email, password, rememberMe);
+                      }
+                    });
+                  },
+                  child: Text('Need an account? Sign up.'),
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            _standardLogInBtn(),
-            SizedBox(height: 20),
-            _googleLogInBtn(),
-            TextButton(
-              onPressed: () {
-                // TODO: Implement Facebook login logic
-              },
-              child: Text('Login with Facebook'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Switch to the Signup screen
-                Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()))
-                    .then((data) async {
-                  if (data != null) {
-                    String email = data['email'];
-                    String password = data['password'];
-                    await onPressedSignInStandard(email, password, false);
-                  }
-                });
-              },
-              child: Text('Need an account? Sign up.'),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -135,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => ModeSelectScreen()),
+              MaterialPageRoute(builder: (context) => MainScreen()),
             );
           }
         } on FirebaseAuthException catch (e) {
@@ -181,7 +200,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => ModeSelectScreen()),
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {
