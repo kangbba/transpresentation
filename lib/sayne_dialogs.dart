@@ -1,6 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
+void sayneToast(String message) {
+  Fluttertoast.showToast(
+    msg: message,
+    toastLength: Toast.LENGTH_LONG,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 5,
+    backgroundColor: Colors.black45,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
+}
 sayneLoadingDialog(BuildContext context, String message) async {
   return await showDialog<bool>(
     context: context,

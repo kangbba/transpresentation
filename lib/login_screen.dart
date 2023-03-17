@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:transpresentation/auth_screen_control.dart';
 import 'package:transpresentation/main_screen.dart';
 import 'package:transpresentation/sayne_dialogs.dart';
@@ -15,7 +16,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final AuthScreenControl authScreenControl = AuthScreenControl();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void dispose() {
@@ -23,31 +23,19 @@ class _LoginScreenState extends State<LoginScreen> {
     _passwordController.dispose();
     super.dispose();
   }
-  //
-  // Future<UserCredential?> signInWithGoogle() async {
-  //   // Trigger the Google Authentication flow.
-  //   final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-  //
-  //   if (googleUser == null) {
-  //     throw FirebaseAuthException(
-  //       code: 'ERROR_ABORTED_BY_USER',
-  //       message: 'Sign in aborted by user',
-  //     );
-  //   }
-  //
-  //   // Obtain the Google Authentication credential.
-  //   final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-  //
-  //   // Create a Firebase credential from the Google Authentication credential.
-  //   final credential = GoogleAuthProvider.credential(
-  //     accessToken: googleAuth.accessToken,
-  //     idToken: googleAuth.idToken,
-  //   );
-  //
-  //   // Sign in to Firebase with the Firebase credential.
-  //   return await _auth.signInWithCredential(credential);
-  // }
 
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    GoogleSignInAccount? _currentUser;
+    String _contactText = '';
+    authScreenControl.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+    });
+    authScreenControl.googleSignIn.signInSilently();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,19 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             SizedBox(height: 20),
-            _logInBtn(),
+            _standardLogInBtn(),
             SizedBox(height: 20),
-            TextButton(
-              onPressed: () async {
-                // try {
-                //   final UserCredential? userCredential = await signInWithGoogle();
-                //   // Navigate to the home screen if the login is successful.
-                // } catch (e) {
-                //   print(e);
-                // }
-              },
-              child: Text('Login with Google'),
-            ),
+            _googleLogInBtn(),
             TextButton(
               onPressed: () {
                 // TODO: Implement Facebook login logic
@@ -103,8 +81,19 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+  Widget _googleLogInBtn() {
+    return TextButton(
+      onPressed: () async {
+        sayneLoadingDialog(context, "구글 접속중");
+        bool succeed = await authScreenControl.signInWithGoogle();
+        Navigator.pop(context);
+        sayneToast("${succeed ? "로그인 성공" : " 로그인 실패"}");
+      },
+      child: Text('Login with Google'),
+    );
+  }
 
-  ElevatedButton _logInBtn() {
+  Widget _standardLogInBtn() {
     return ElevatedButton(
             onPressed: () async {
               sayneLoadingDialog(context, "로그인중");
@@ -125,4 +114,5 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Text('Login'),
           );
   }
+
 }

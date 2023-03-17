@@ -83,7 +83,7 @@ class _SignupScreenState extends State<SignupScreen> {
               String pw = _passwordController.text.trim();
               String cpw = _confirmPasswordController.text.trim();
               if(pw != cpw){
-                Fluttertoast.showToast(msg: 'confirm 비밀번호가 올바르지 않음');
+                sayneToast('confirm 비밀번호가 올바르지 않음');
                 return;
               }
               sayneLoadingDialog(context, "회원가입 시도");
@@ -92,14 +92,14 @@ class _SignupScreenState extends State<SignupScreen> {
                   email: email,
                   password: pw,
                 );
-                Fluttertoast.showToast(msg: 'User ${userCredential.user?.uid} signed up success');
+                sayneToast('User ${userCredential.user?.uid} signed up success');
                 Navigator.pop(context);
               }
               on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {
-                  Fluttertoast.showToast(msg: 'The password provided is too weak.');
+                  sayneToast('The password provided is too weak.');
                 } else if (e.code == 'email-already-in-use') {
-                  Fluttertoast.showToast(msg: 'The account already exists for that email.');
+                  sayneToast('The account already exists for that email.');
                 }
               } catch (e) {
                 print(e);
