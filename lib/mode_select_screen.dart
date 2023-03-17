@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'auth_screen_control.dart';
+
 class ModeSelectScreen extends StatefulWidget {
   const ModeSelectScreen({Key? key}) : super(key: key);
 
@@ -8,13 +10,12 @@ class ModeSelectScreen extends StatefulWidget {
 }
 
 class _ModeSelectScreenState extends State<ModeSelectScreen> {
+  final authScreenControl = AuthScreenControl.instance;
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(child: Icon(Icons.add)),
-        Expanded(child: Icon(Icons.add)),
-      ],
+    return Scaffold(
+      appBar: AppBar(),
+      body: Container(),
     );
   }
 }

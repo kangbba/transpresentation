@@ -4,8 +4,12 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:transpresentation/auth_screen_control.dart';
 import 'package:transpresentation/main_screen.dart';
+import 'package:transpresentation/mode_select_screen.dart';
 import 'package:transpresentation/sayne_dialogs.dart';
 import 'package:transpresentation/signup_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'local_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -13,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final AuthScreenControl authScreenControl = AuthScreenControl();
+  final authScreenControl = AuthScreenControl.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -30,9 +34,11 @@ class _LoginScreenState extends State<LoginScreen> {
     // TODO: implement initState
     super.initState();
 
+    loadRememberMe();
     GoogleSignInAccount? _currentUser;
     String _contactText = '';
     authScreenControl.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      print("으잉");
     });
     authScreenControl.googleSignIn.signInSilently();
   }
@@ -56,6 +62,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 labelText: 'Password',
               ),
             ),
+            FutureBuilder<bool>(
+              future: LocalStorage.getRememberMeLocal(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return CheckboxListTile(
+                    title: Text("아이디 기억하기"),
+                    value: snapshot.data!,
+                    onChanged: (value) async {
+                      await LocalStorage.setRememberMeLocal(value!);
+                      setState(() {
+
+                      });
+                    },
+                  );
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
             SizedBox(height: 20),
             _standardLogInBtn(),
             SizedBox(height: 20),
@@ -69,10 +94,14 @@ class _LoginScreenState extends State<LoginScreen> {
             TextButton(
               onPressed: () {
                 // Switch to the Signup screen
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SignupScreen()),
-                );
+                Navigator.push(context, MaterialPageRoute(builder: (context) => SignupScreen()))
+                    .then((data) async {
+                  if (data != null) {
+                    String email = data['email'];
+                    String password = data['password'];
+                    await onPressedSignInStandard(email, password, false);
+                  }
+                });
               },
               child: Text('Need an account? Sign up.'),
             ),
@@ -81,13 +110,45 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+// 로그인 버튼을 눌렀을 때 호출되는 함수
+
+// 앱을 실행할 때 호출되는 함수
+  void loadRememberMe() async {
+    bool rememberMe = await LocalStorage.getRememberMeLocal(); // 값을 불러옵니다.
+    String recentId = rememberMe ? await LocalStorage.getRecentIdLocal() : '';
+    setState(() {
+      _emailController.text = recentId;
+    });
+  }
   Widget _googleLogInBtn() {
     return TextButton(
       onPressed: () async {
-        sayneLoadingDialog(context, "구글 접속중");
-        bool succeed = await authScreenControl.signInWithGoogle();
-        Navigator.pop(context);
-        sayneToast("${succeed ? "로그인 성공" : " 로그인 실패"}");
+        sayneLoadingDialog(context, "로그인중");
+        try {
+          UserCredential userCredential = await authScreenControl.signInWithGoogle();
+          // 로그인이 성공한 경우, UserCredential 객체를 사용하여 로그인한 사용자의 정보를 가져옵니다.
+          User user = userCredential.user!;
+          authScreenControl.curUserCredential = userCredential;
+          authScreenControl.curUserPlatform = LoginPlatform.google;
+          sayneToast("${user.email}");
+          if(mounted){
+            Navigator.pop(context);
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ModeSelectScreen()),
+            );
+          }
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'ERROR_ABORTED_BY_USER') {
+            sayneToast("ERROR_ABORTED_BY_USER");
+            // 사용자가 Google 로그인을 취소한 경우 처리할 코드
+          } else if (e.code == 'ERROR_SIGN_IN_FAILED') {
+            sayneToast("ERROR_SIGN_IN_FAILED");
+            // Google 로그인에 실패한 경우 처리할 코드
+          }
+        } catch (e) {
+          // FirebaseAuthException이 아닌 다른 예외가 발생한 경우 처리할 코드
+        }
       },
       child: Text('Login with Google'),
     );
@@ -96,23 +157,47 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _standardLogInBtn() {
     return ElevatedButton(
             onPressed: () async {
-              sayneLoadingDialog(context, "로그인중");
               String email = _emailController.text.trim();
-              String pw = _passwordController.text.trim();
-              bool loginSucceed = await authScreenControl.loginTry(email, pw);
-              if(loginSucceed){
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => MainScreen()),
-                );
-              }
-              else{
-                Navigator.pop(context);
-              }
+              String password = _passwordController.text.trim();
+              bool rememberMe = await LocalStorage.getRememberMeLocal();
+              await onPressedSignInStandard(email, password, rememberMe);
             },
             child: Text('Login'),
           );
+  }
+
+  Future<void> onPressedSignInStandard(String email, String password, bool rememberMe) async {
+    sayneLoadingDialog(context, "로그인중");
+    try {
+      UserCredential userCredential = await authScreenControl.signInStandard(email, password);
+      // 로그인 성공 시 처리할 코드를 작성합니다.
+      if(rememberMe){
+        LocalStorage.setRecentIdLocal(email);
+        print("유저가 최근 아이디를 기억해달라고 요청하였음");
+      }
+      authScreenControl.curUserCredential = userCredential;
+      authScreenControl.curUserPlatform = LoginPlatform.standard;
+      if(mounted){
+        Navigator.pop(context);
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ModeSelectScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      Navigator.pop(context);
+      // Firebase Authentication 예외 처리
+      if (e.code == 'user-not-found') {
+        sayneToast('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        sayneToast('Wrong password provided for that user.');
+      } else {
+        sayneToast('Firebase Authentication 예외: ${e.message}');
+      }
+    } catch (e) {
+      // 그 외 예외 처리
+      sayneToast('예외 발생: $e');
+    }
   }
 
 }

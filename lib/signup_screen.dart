@@ -53,18 +53,6 @@ class _SignupScreenState extends State<SignupScreen> {
             SizedBox(height: 20),
             TextButton(
               onPressed: () {
-                // TODO: Implement Google login logic
-              },
-              child: Text('Sign up with Google'),
-            ),
-            TextButton(
-              onPressed: () {
-                // TODO: Implement Facebook login logic
-              },
-              child: Text('Sign up with Facebook'),
-            ),
-            TextButton(
-              onPressed: () {
                 // Switch to the Login screen
                 Navigator.pop(context);
               },
@@ -79,6 +67,7 @@ class _SignupScreenState extends State<SignupScreen> {
   ElevatedButton _signUpBtn(BuildContext context) {
     return ElevatedButton(
             onPressed: () async {
+              sayneLoadingDialog(context, "회원가입중");
               String email = _emailController.text.trim();
               String pw = _passwordController.text.trim();
               String cpw = _confirmPasswordController.text.trim();
@@ -86,16 +75,19 @@ class _SignupScreenState extends State<SignupScreen> {
                 sayneToast('confirm 비밀번호가 올바르지 않음');
                 return;
               }
-              sayneLoadingDialog(context, "회원가입 시도");
               try {
                 UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                   email: email,
                   password: pw,
                 );
                 sayneToast('User ${userCredential.user?.uid} signed up success');
-                Navigator.pop(context);
+                if(mounted){
+                  Navigator.pop(context);
+                  Navigator.pop(context, {'email': email, 'password': pw});
+                }
               }
               on FirebaseAuthException catch (e) {
+                Navigator.pop(context);
                 if (e.code == 'weak-password') {
                   sayneToast('The password provided is too weak.');
                 } else if (e.code == 'email-already-in-use') {
@@ -105,7 +97,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 print(e);
               }
               finally{
-                Navigator.pop(context);
               }
             },
             child: Text('Sign up'),

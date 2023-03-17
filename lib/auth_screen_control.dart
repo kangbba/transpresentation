@@ -1,11 +1,28 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transpresentation/sayne_dialogs.dart';
 
-class AuthScreenControl {
+enum LoginPlatform{
+  standard,
+  google,
+  facebook,
+  apple,
+}
+class AuthScreenControl with ChangeNotifier{
+  static AuthScreenControl? _instance;
+  static AuthScreenControl get instance {
+    _instance ??= AuthScreenControl();
+    return _instance!;
+  }
+
+  UserCredential? _curUserCredential;
+  LoginPlatform? _curUserPlatform;
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
 
   GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: [
@@ -13,42 +30,59 @@ class AuthScreenControl {
       'https://www.googleapis.com/auth/contacts.readonly',
     ],
   );
-  Future<bool> loginTry(String email, String pw) async{
-    bool success = false;
+  Future<UserCredential> signInStandard(String email, String pw) async {
     try {
       final UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: email,
         password: pw,
       );
-      success = true;
-      // Navigate to the home screen if the login is successful.
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw FirebaseAuthException(
+        code: e.code,
+        message: e.message,
+      );
+    } catch (e) {
+      throw FirebaseAuthException(
+        code: 'ERROR_LOGIN_FAILED',
+        message: '로그인에 실패했습니다. 다시 시도해주세요.',
+      );
+    } finally {
+      // finally 블록에서 필요한 코드를 실행해 줍니다.
     }
-    on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        sayneToast('No user found for that email.');
-      } else if (e.code == 'wrong-password') {
-        sayneToast('Wrong password provided for that user.');
-      }
-    }
-    catch (e){
-      sayneToast('$e');
-    }
-    finally{
-    }
-    return success;
   }
 
-
-  Future<bool> signInWithGoogle() async {
+  Future<UserCredential> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? account = await googleSignIn.signIn();
-      return account != null;
-    } catch (error) {
-      print("구글 로그인 도중 에러발생 : $error");
-      return false;
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+      if (googleUser == null) {
+        throw FirebaseAuthException(
+          code: 'ERROR_ABORTED_BY_USER',
+          message: 'Google 로그인이 취소되었습니다.',
+        );
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      // Once signed in, return the UserCredential
+      return await FirebaseAuth.instance.signInWithCredential(credential);
+    } catch (e) {
+      throw FirebaseAuthException(
+        code: 'ERROR_SIGN_IN_FAILED',
+        message: 'Google 로그인에 실패했습니다. 다시 시도해주세요.',
+        // Firebase Authentication 예외를 던지기 때문에 stack trace도 포함시켜줍니다.
+      );
     }
   }
-
 
   Future<bool> signOutFromGoogle() async {
     try {
@@ -56,7 +90,33 @@ class AuthScreenControl {
       return true;
     } catch (error) {
       print("구글 로그아웃 도중 에러발생 : $error");
-      return false;
+      throw FirebaseAuthException(
+        code: 'ERROR_SIGN_OUT_FAILED',
+        message: 'Google 로그아웃에 실패했습니다. 다시 시도해주세요.',
+        // Firebase Authentication 예외를 던지기 때문에 stack trace도 포함시켜줍니다.
+      );
     }
   }
+
+  UserCredential? get curUserCredential{
+    return _curUserCredential;
+  }
+  set curUserCredential(UserCredential? userCredential){
+    _curUserCredential = userCredential;
+    notifyListeners();
+  }
+
+  LoginPlatform? get curUserPlatform{
+    return _curUserPlatform;
+  }
+  set curUserPlatform(LoginPlatform? loginPlatform){
+    _curUserPlatform = loginPlatform;
+    notifyListeners();
+  }
+
+  void clearCurUserInformation(){
+    curUserCredential = null;
+    curUserPlatform = null;
+  }
+
 }

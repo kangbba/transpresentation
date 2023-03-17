@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "287681615740-dk7k2tq5oaapcebmqmkd6p4iidmavs6h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ensayne.transpresentation",
+            "certificate_hash": "4a57a23faa2dffa42efb16fcd75da6afa1fd130b"
+          }
+        },
+        {
           "client_id": "287681615740-15uirhgvcvqgq1gk4kfc96ufqpgnrvru.apps.googleusercontent.com",
           "client_type": 3
         }
