@@ -11,10 +11,10 @@ enum LoginPlatform{
   facebook,
   apple,
 }
-class AuthScreenControl with ChangeNotifier{
-  static AuthScreenControl? _instance;
-  static AuthScreenControl get instance {
-    _instance ??= AuthScreenControl();
+class AuthProvider with ChangeNotifier{
+  static AuthProvider? _instance;
+  static AuthProvider get instance {
+    _instance ??= AuthProvider();
     return _instance!;
   }
 

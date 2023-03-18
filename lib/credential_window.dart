@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'auth_screen_control.dart';
+import 'auth_provider.dart';
 
 class CredentialWindow extends StatefulWidget {
   const CredentialWindow({Key? key}) : super(key: key);
@@ -10,7 +10,7 @@ class CredentialWindow extends StatefulWidget {
 }
 
 class _CredentialWindowState extends State<CredentialWindow> {
-  final authScreenControl = AuthScreenControl.instance;
+  final authScreenControl = AuthProvider.instance;
   @override
   Widget build(BuildContext context) {
     return Align(

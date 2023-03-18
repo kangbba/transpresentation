@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'auth_screen_control.dart';
+import 'auth_provider.dart';
 
 class ModeSelectScreen extends StatefulWidget {
   const ModeSelectScreen({Key? key}) : super(key: key);
@@ -11,8 +11,9 @@ class ModeSelectScreen extends StatefulWidget {
 }
 
 class _ModeSelectScreenState extends State<ModeSelectScreen> {
-  final authScreenControl = AuthScreenControl.instance;
+  final authScreenControl = AuthProvider.instance;
 
+  String roomId = "users";
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -42,7 +43,7 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
     String mode = "Presenter"; // 모드 선택
     String uid = authScreenControl.curUserCredential!.user!.uid; // 현재 사용자의 uid 가져오기
     await FirebaseFirestore.instance // 데이터베이스에 데이터 저장
-        .collection('users')
+        .collection(roomId)
         .doc(uid)
         .set({'mode': mode});
     // TODO: presenter 모드로 이동하는 코드 작성
@@ -58,7 +59,7 @@ class _ModeSelectScreenState extends State<ModeSelectScreen> {
     String mode = "Audience"; // 모드 선택
     String uid = authScreenControl.curUserCredential!.user!.uid; // 현재 사용자의 uid 가져오기
     await FirebaseFirestore.instance // 데이터베이스에 데이터 저장
-        .collection('users')
+        .collection(roomId)
         .doc(uid)
         .set({'mode': mode});
     // TODO: audience 모드로 이동하는 코드 작성

@@ -2,7 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:transpresentation/auth_screen_control.dart';
+import 'package:provider/provider.dart';
+import 'package:transpresentation/auth_provider.dart';
 import 'package:transpresentation/main_screen.dart';
 import 'package:transpresentation/mode_select_screen.dart';
 import 'package:transpresentation/sayne_dialogs.dart';
@@ -17,7 +18,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final authScreenControl = AuthScreenControl.instance;
+  final _authProvider = AuthProvider.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -38,10 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
     loadRememberMe();
     GoogleSignInAccount? _currentUser;
     String _contactText = '';
-    authScreenControl.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+    _authProvider.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       print("으잉");
     });
-    authScreenControl.googleSignIn.signInSilently();
+    _authProvider.googleSignIn.signInSilently();
   }
   @override
   Widget build(BuildContext context) {
@@ -144,11 +145,11 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: () async {
         sayneLoadingDialog(context, "로그인중");
         try {
-          UserCredential userCredential = await authScreenControl.signInWithGoogle();
+          UserCredential userCredential = await _authProvider.signInWithGoogle();
           // 로그인이 성공한 경우, UserCredential 객체를 사용하여 로그인한 사용자의 정보를 가져옵니다.
           User user = userCredential.user!;
-          authScreenControl.curUserCredential = userCredential;
-          authScreenControl.curUserPlatform = LoginPlatform.google;
+          _authProvider.curUserCredential = userCredential;
+          _authProvider.curUserPlatform = LoginPlatform.google;
           sayneToast("${user.email}");
           if(mounted){
             Navigator.pop(context);
@@ -188,14 +189,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> onPressedSignInStandard(String email, String password, bool rememberMe) async {
     sayneLoadingDialog(context, "로그인중");
     try {
-      UserCredential userCredential = await authScreenControl.signInStandard(email, password);
+      UserCredential userCredential = await _authProvider.signInStandard(email, password);
       // 로그인 성공 시 처리할 코드를 작성합니다.
       if(rememberMe){
         LocalStorage.setRecentIdLocal(email);
         print("유저가 최근 아이디를 기억해달라고 요청하였음");
       }
-      authScreenControl.curUserCredential = userCredential;
-      authScreenControl.curUserPlatform = LoginPlatform.standard;
+      _authProvider.curUserCredential = userCredential;
+      _authProvider.curUserPlatform = LoginPlatform.standard;
       if(mounted){
         Navigator.pop(context);
         Navigator.push(
