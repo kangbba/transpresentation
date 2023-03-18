@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 class ChatRoom {
@@ -26,22 +27,26 @@ class ChatRoom {
 class Message {
   final String text;
   final String senderId;
+  final String senderEmail;
   final DateTime createdAt;
 
   Message({
     required this.text,
     required this.senderId,
+    required this.senderEmail,
     required this.createdAt,
   });
 
   factory Message.fromMap(Map<String, dynamic> data) {
     final text = data['text'];
     final senderId = data['senderId'];
+    final senderEmail = data['senderEmail'];
     final timestamp = (data['createdAt'] as Timestamp).toDate();
 
     return Message(
       text: text,
       senderId: senderId,
+      senderEmail: senderEmail,
       createdAt: timestamp,
     );
   }
@@ -74,7 +79,7 @@ class ChatProvider with ChangeNotifier {
   Future<void> sendMessage(
       String chatRoomId,
       String message,
-      String senderId,
+      UserCredential userCredential,
       ) async {
     final messageRef = FirebaseFirestore.instance
         .collection('rooms')
@@ -84,7 +89,8 @@ class ChatProvider with ChangeNotifier {
 
     final newMessage = {
       'text': message,
-      'senderId': senderId,
+      'senderId': userCredential.user!.uid,
+      'senderEmail': userCredential.user!.email,
       'createdAt': FieldValue.serverTimestamp(),
     };
 
@@ -103,4 +109,6 @@ class ChatProvider with ChangeNotifier {
       return snapshot.docs.map((doc) => Message.fromMap(doc.data())).toList();
     });
   }
+
+
 }

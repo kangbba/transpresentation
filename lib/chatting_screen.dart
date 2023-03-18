@@ -11,7 +11,7 @@ class ChattingScreen extends StatelessWidget {
   ChattingScreen({super.key, required this.chatRoom});
 
   final ChatRoom chatRoom;
-  final currentUser = AuthProvider.instance.curUserCredential?.user;
+  final authProvider = AuthProvider.instance;
   final chatProvider = ChatProvider.instance;
   final TextEditingController _textController = TextEditingController();
 
@@ -20,7 +20,7 @@ class ChattingScreen extends StatelessWidget {
   Future<void> _sendMessage() async {
     final message = _textController.text.trim();
     if (message.isNotEmpty) {
-      await chatProvider.sendMessage('chatRoomId', message, 'senderId');
+      await chatProvider.sendMessage(chatRoom.id, message, authProvider.curUserCredential!);
       _textController.clear();
     }
   }
@@ -44,11 +44,7 @@ class ChattingScreen extends StatelessWidget {
                     itemCount: messages.length,
                     itemBuilder: (context, index) {
                       final message = messages[index];
-                      return ListTile(
-                        title: Text(message.text),
-                        subtitle: Text(
-                            '${message.senderId} - ${message.createdAt}'),
-                      );
+                      return messageListTile(message, message.senderId == authProvider.curUserCredential!.user!.uid);
                     },
                   );
                 } else {
@@ -84,6 +80,21 @@ class ChattingScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget messageListTile(Message message, bool isMine) {
+    return Padding(
+      padding: const EdgeInsets.only(right: 32.0),
+      child: ListTile(
+        subtitle: Text('${message.senderEmail}'),
+        title: Text(message.text),
+        trailing: Text(
+            '${message.createdAt.toString().split(' ')[1].split(':')[0]}'+
+            ':${message.createdAt.toString().split(' ')[1].split(':')[1]}'),
+        // subtitle: Text(
+        //     '${message.senderId} - ${message.createdAt}'),
       ),
     );
   }
