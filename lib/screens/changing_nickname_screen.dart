@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:transpresentation/helper/sayne_dialogs.dart';
+
+import '../auth_provider.dart';
+import '../helper/sayne_dialogs.dart';
 
 class ChangingNicknameScreen extends StatefulWidget {
   const ChangingNicknameScreen({Key? key}) : super(key: key);
@@ -9,8 +9,22 @@ class ChangingNicknameScreen extends StatefulWidget {
   @override
   State<ChangingNicknameScreen> createState() => _ChangingNicknameScreenState();
 }
+
 class _ChangingNicknameScreenState extends State<ChangingNicknameScreen> {
   final TextEditingController _nicknameController = TextEditingController();
+  final _authProvider = AuthProvider.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_authProvider.curUser?.displayName?.isNotEmpty ?? false) {
+      // 사용자의 닉네임이 비어있지 않은 경우
+      _nicknameController.text = _authProvider.curUser!.displayName!;
+    } else {
+      // 사용자의 닉네임이 비어있는 경우
+      _nicknameController.text = _authProvider.curUser?.email?.split("@")[0] ?? '';
+    }
+  }
 
   @override
   void dispose() {
@@ -35,7 +49,7 @@ class _ChangingNicknameScreenState extends State<ChangingNicknameScreen> {
             ),
             ElevatedButton(
               onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
+                final user = _authProvider.curUser;
                 if (user == null) {
                   return; // 로그인되어 있지 않으면 종료
                 }

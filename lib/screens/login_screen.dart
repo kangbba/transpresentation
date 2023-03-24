@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
+import 'package:transpresentation/screens/changing_nickname_screen.dart';
 import 'package:transpresentation/screens/room_screen.dart';
 import 'package:transpresentation/screens/selecting_room_screen.dart';
 import 'package:transpresentation/screens/signup_screen.dart';
@@ -153,10 +154,20 @@ class _LoginScreenState extends State<LoginScreen> {
           sayneToast("${user.email}");
           if(mounted){
             Navigator.pop(context);
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
-            );
+            if(_authProvider.curUser?.displayName?.isNotEmpty ?? false){
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
+              );
+            }
+            else{
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChangingNicknameScreen()),
+
+
+              );
+            }
           }
         } on FirebaseAuthException catch (e) {
           if (e.code == 'ERROR_ABORTED_BY_USER') {
@@ -199,10 +210,18 @@ class _LoginScreenState extends State<LoginScreen> {
       _authProvider.curUserPlatform = LoginPlatform.standard;
       if(mounted){
         Navigator.pop(context);
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
-        );
+         if(_authProvider.curUser?.displayName?.isNotEmpty ?? false){
+           Navigator.push(
+             context,
+             MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
+           );
+         }
+         else{
+           Navigator.push(
+             context,
+             MaterialPageRoute(builder: (context) => ChangingNicknameScreen()),
+           );
+         }
       }
     } on FirebaseAuthException catch (e) {
       Navigator.pop(context);

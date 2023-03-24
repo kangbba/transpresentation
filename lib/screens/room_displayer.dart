@@ -37,21 +37,9 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
             final member = members[index] as Map<String, dynamic>;
             final userEmail = member['userEmail'] as String;
 
+
             return ListTile(
               title: Text(userEmail),
-              trailing: ElevatedButton(
-                onPressed: () async {
-                  final result = await widget.chatRoom.exitRoom(userEmail);
-                  if (!result) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Failed to exit the chat room.'),
-                      ),
-                    );
-                  }
-                },
-                child: Text('Exit'),
-              ),
             );
           },
         );

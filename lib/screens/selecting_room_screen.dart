@@ -1,10 +1,12 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:transpresentation/auth_provider.dart';
 import 'package:transpresentation/screens/room_screen.dart';
 import '../chat_provider.dart';
 import '../helper/sayne_dialogs.dart';
+import 'changing_nickname_screen.dart';
 import 'chatting_screen.dart';
 
 class SelectingRoomScreen extends StatefulWidget {
@@ -15,6 +17,19 @@ class SelectingRoomScreen extends StatefulWidget {
 class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
   final _chatProvider = ChatProvider.instance;
   final _authProvider = AuthProvider.instance;
+
+  void _showChangeNicknameDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          child: ChangingNicknameScreen(),
+        );
+      },
+      barrierDismissible: false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,9 +43,8 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
                 'ChatRoom_${DateTime.now().millisecondsSinceEpoch}',
               );
               final chatRoom = ChatRoom.fromReference(chatRoomRef);
-              final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(_authProvider.curUser!.email!);
-
-              sayneToast("방 참가 ${isJoined ? "성공" : "실패"}");
+              final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(_authProvider.curUser!.email!, _authProvider.curUser!.displayName);
+              sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");
 
               Navigator.push(
                 context,
@@ -40,10 +54,17 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
               );
             },
           ),
+          IconButton(
+
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              _showChangeNicknameDialog();
+            },
+          ),
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
+        stream: FirebaseFirestore.instance.collection('chatRooms').snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return Center(
@@ -67,7 +88,10 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
               return ListTile(
                 title: Text(chatRoom.name),
                 subtitle: Text(chatRoom.createdAt.toString()),
-                onTap: () {
+                onTap: () async{
+                  final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(_authProvider.curUser!.email!, _authProvider.curUser!.displayName);
+                  sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(

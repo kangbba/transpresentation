@@ -38,28 +38,24 @@ class ChatRoom {
       createdAt: DateTime.now(),
     );
   }
-  Future<bool> joinRoom(String email) async {
+  Future<bool> joinRoom(String email, displayName) async {
     try {
       final userRef = FirebaseFirestore.instance.collection('users').doc(email);
       final userSnapshot = await userRef.get();
-
       if (!userSnapshot.exists) {
-        // 사용자가 존재하지 않는 경우
-        return false;
+        // 존재하는 경우 "members" 컬렉션에 사용자를 추가
+        final membersRef = FirebaseFirestore.instance
+            .collection('chatRooms')
+            .doc(id)
+            .collection('members')
+            .doc(email);
+
+        await membersRef.set({
+          'userEmail': email,
+          'displayName' : displayName,
+          'role': 'member',
+        });
       }
-
-      // 존재하는 경우 "members" 컬렉션에 사용자를 추가
-      final membersRef = FirebaseFirestore.instance
-          .collection('chatRooms')
-          .doc(id)
-          .collection('members')
-          .doc(email);
-
-      await membersRef.set({
-        'userEmail': email,
-        'role': 'member',
-      });
-
       return true;
     } catch (e) {
       // 에러 발생 시 false 반환
@@ -126,7 +122,7 @@ class ChatProvider with ChangeNotifier {
 
   Future<DocumentReference> createChatRoom(String chatRoomName) async {
     final chatRoomRef =
-    FirebaseFirestore.instance.collection('rooms').doc();
+    FirebaseFirestore.instance.collection('chatRooms').doc();
 
     final newChatRoom = {
       'name': chatRoomName,
@@ -144,7 +140,7 @@ class ChatProvider with ChangeNotifier {
       UserCredential userCredential,
       ) async {
     final messageRef = FirebaseFirestore.instance
-        .collection('rooms')
+        .collection('chatRooms')
         .doc(chatRoomId)
         .collection('messages')
         .doc();
@@ -161,7 +157,7 @@ class ChatProvider with ChangeNotifier {
 
   Stream<List<Message>> getRecentMessages(String chatRoomId) {
     final messagesRef = FirebaseFirestore.instance
-        .collection('rooms')
+        .collection('chatRooms')
         .doc(chatRoomId)
         .collection('messages')
         .orderBy('createdAt', descending: true)

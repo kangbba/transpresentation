@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/helper/sayne_dialogs.dart';
 
 import '../auth_provider.dart';
 import '../chat_provider.dart';
@@ -16,17 +17,23 @@ class RoomScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(chatRoom.name),
-      ),
-      body: Column(
-        children: [
-          RoomDisplayer(chatRoom: chatRoom,),
-          // other widgets
-        ],
+    return WillPopScope(
+      onWillPop: _onBackPressed,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(chatRoom.name),
+        ),
+        body: RoomDisplayer(chatRoom: chatRoom,)
       ),
     );
+  }
+
+  Future<bool> _onBackPressed() async{
+    final result = await chatRoom.exitRoom(authProvider.curUser!.email!);
+    if (!result) {
+      sayneToast("나가기 실패");
+      return false;
+    }
+    return true;
   }
 }

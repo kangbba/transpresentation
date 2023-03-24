@@ -122,11 +122,24 @@ class AuthProvider with ChangeNotifier{
   }
 
   User? get curUser{
-    if(_curUserCredential == null){
-      return null;
-    }
-    else{
-      return _curUserCredential!.user;
-    }
+    return FirebaseAuth.instance.currentUser;
   }
+
+  Future<User?> getUserFromEmail(String email) async {
+    try {
+      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: "dummyPassword", // 일시적으로 필요한 필드입니다.
+      );
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        print('No user found for that email.');
+      } else if (e.code == 'wrong-password') {
+        print('Wrong password provided for that user.');
+      }
+    }
+    return null;
+  }
+
 }
