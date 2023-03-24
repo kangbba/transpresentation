@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 
-import 'auth_provider.dart';
-import 'chat_provider.dart';
-import 'main_screen.dart';
+import '../auth_provider.dart';
+import '../chat_provider.dart';
 
 class ChattingScreen extends StatelessWidget {
 

@@ -4,13 +4,13 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/auth_provider.dart';
-import 'package:transpresentation/main_screen.dart';
-import 'package:transpresentation/mode_select_screen.dart';
-import 'package:transpresentation/sayne_dialogs.dart';
-import 'package:transpresentation/signup_screen.dart';
+import 'package:transpresentation/helper/sayne_dialogs.dart';
+import 'package:transpresentation/screens/room_screen.dart';
+import 'package:transpresentation/screens/selecting_room_screen.dart';
+import 'package:transpresentation/screens/signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'local_storage.dart';
+import '../helper/local_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -155,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
             Navigator.pop(context);
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => MainScreen()),
+              MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
             );
           }
         } on FirebaseAuthException catch (e) {
@@ -201,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pop(context);
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
         );
       }
     } on FirebaseAuthException catch (e) {

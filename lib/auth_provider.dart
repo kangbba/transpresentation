@@ -1,9 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:transpresentation/sayne_dialogs.dart';
+import 'package:transpresentation/helper/sayne_dialogs.dart';
 
 enum LoginPlatform{
   standard,
@@ -11,6 +12,7 @@ enum LoginPlatform{
   facebook,
   apple,
 }
+
 class AuthProvider with ChangeNotifier{
   static AuthProvider? _instance;
   static AuthProvider get instance {
@@ -98,6 +100,7 @@ class AuthProvider with ChangeNotifier{
     }
   }
 
+
   UserCredential? get curUserCredential{
     return _curUserCredential;
   }
@@ -105,7 +108,6 @@ class AuthProvider with ChangeNotifier{
     _curUserCredential = userCredential;
     notifyListeners();
   }
-
   LoginPlatform? get curUserPlatform{
     return _curUserPlatform;
   }
@@ -119,4 +121,12 @@ class AuthProvider with ChangeNotifier{
     curUserPlatform = null;
   }
 
+  User? get curUser{
+    if(_curUserCredential == null){
+      return null;
+    }
+    else{
+      return _curUserCredential!.user;
+    }
+  }
 }
