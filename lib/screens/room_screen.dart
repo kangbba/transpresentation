@@ -5,6 +5,8 @@ import 'package:transpresentation/helper/sayne_dialogs.dart';
 
 import '../auth_provider.dart';
 import '../chat_provider.dart';
+import '../chat_room.dart';
+import '../user_model.dart';
 import 'room_displayer.dart';
 
 class RoomScreen extends StatelessWidget {
@@ -29,7 +31,8 @@ class RoomScreen extends StatelessWidget {
   }
 
   Future<bool> _onBackPressed() async{
-    final result = await chatRoom.exitRoom(authProvider.curUser!.email!);
+    UserModel user = UserModel.fromFirebaseUser(authProvider.curUser!);
+    final result = await chatRoom.exitRoom(user!, );
     if (!result) {
       sayneToast("나가기 실패");
       return false;

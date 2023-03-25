@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../auth_provider.dart';
 import '../chat_provider.dart';
+import '../chat_room.dart';
 
 class ChattingScreen extends StatelessWidget {
 
