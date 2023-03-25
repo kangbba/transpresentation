@@ -25,7 +25,10 @@ class RoomScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(chatRoom.name),
         ),
-        body: RoomDisplayer(chatRoom: chatRoom,)
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: RoomDisplayer(chatRoom: chatRoom,),
+        )
       ),
     );
   }

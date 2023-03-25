@@ -5,6 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:transpresentation/user_model.dart';
 
+import 'chat_room.dart';
+import 'helper/sayne_dialogs.dart';
+
 class Message {
   final String text;
   final String senderId;
@@ -42,23 +45,22 @@ class ChatProvider with ChangeNotifier {
   factory ChatProvider.getInstance() => _instance;
 
   static ChatProvider get instance => _instance;
-  Future<DocumentReference> createChatRoom(String chatRoomName, UserModel host) async {
-    final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc();
 
+  Future<ChatRoom> createChatRoom(String chatRoomName, UserModel hostUserModel) async {
+    final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc();
     final newChatRoom = {
       'name': chatRoomName,
       'createdAt': FieldValue.serverTimestamp(),
-      'host': {
-        'uid': host.uid,
-        'displayName': host.displayName,
-        'email': host.email,
-        'photoURL': host.photoUrl,
-      },
     };
     await chatRoomRef.set(newChatRoom);
-
-    return chatRoomRef;
+    final chatRoomSnapshot = await chatRoomRef.get();
+    final chatRoom = ChatRoom.fromSnapshot(chatRoomSnapshot);
+    await chatRoom.joinRoom(hostUserModel);
+    sayneToast("방 참가 성공");
+    await chatRoom.setHost(hostUserModel);
+    return chatRoom;
   }
+
 
 
 

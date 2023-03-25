@@ -42,21 +42,10 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
             icon: Icon(Icons.add),
             onPressed: () async {
               UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
-              final chatRoomRef = await _chatProvider.createChatRoom(
-                'ChatRoom_${DateTime.now().millisecondsSinceEpoch}', userModel);
-
-              final chatRoomSnapshot = await chatRoomRef.get();
-              final chatRoom = ChatRoom.fromSnapshot(chatRoomSnapshot);
-
-// ChatRoom.setHost 메서드를 호출하여 방의 호스트를 설정합니다.
-              final isHostSet = await chatRoom.setHost(UserModel.fromFirebaseUser(_authProvider.curUser!));
-              sayneToast("${_authProvider.curUser!.email} 의 방 만들기 ${isHostSet ? "성공" : "실패"}");
-
-              if (isHostSet) {
-                // 호스트 설정이 성공한 경우에만 참가를 시도합니다.
-                final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(userModel);
-                sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");
-              }
+              final chatRoom = await _chatProvider.createChatRoom(
+                  'ChatRoom_${DateTime.now().millisecondsSinceEpoch}',
+                  userModel
+              );
 
 
               Navigator.push(
@@ -98,13 +87,12 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
             itemCount: chatRooms.length,
             itemBuilder: (context, index) {
               final chatRoom = chatRooms[index];
-
               UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
               return ListTile(
                 title: Text(chatRoom.name),
                 subtitle: Text(chatRoom.createdAt.toString()),
                 onTap: () async{
-                  final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(UserModel.fromFirebaseUser(_authProvider.curUser!));
+                  final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(userModel);
                   sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");
 
                   Navigator.push(

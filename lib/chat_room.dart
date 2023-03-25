@@ -4,17 +4,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/user_model.dart';
 
-class ChatRoom with ChangeNotifier{
+class ChatRoom{
   final String id;
   final String name;
   final DateTime createdAt;
-  late UserModel host; // 새로운 필드 추가
 
   ChatRoom({
     required this.id,
     required this.name,
     required this.createdAt,
-    required this.host, // 생성자에서 초기화
   });
 
   Stream<List<dynamic>> get membersStream {
@@ -29,6 +27,20 @@ class ChatRoom with ChangeNotifier{
         .toList());
   }
 
+  Stream<UserModel?> get hostStream {
+    final hostRef = FirebaseFirestore.instance
+        .collection('chatRooms')
+        .doc(id)
+        .snapshots();
+
+    return hostRef.map((docSnapshot) {
+      final data = docSnapshot.data() as Map<String, dynamic>;
+      final hostData = data['host'] as Map<String, dynamic>;
+      return UserModel.fromMap(hostData);
+    });
+  }
+
+
   factory ChatRoom.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
 
@@ -36,15 +48,8 @@ class ChatRoom with ChangeNotifier{
       id: snapshot.id,
       name: data['name'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      host: UserModel(
-        uid: data['host']['uid'] ?? '',
-        displayName: data['host']['displayName'] ?? '',
-        email: data['host']['email'] ?? '',
-        photoUrl: data['host']['photoURL'] ?? '',
-      ),
     );
   }
-
   Future<bool> joinRoom(UserModel user) async {
     try {
       await FirebaseFirestore.instance
@@ -52,17 +57,14 @@ class ChatRoom with ChangeNotifier{
           .doc(id)
           .collection('members')
           .doc(user.uid)
-          .set({
-        'uid': user.uid,
-        'email': user.email,
-        'photoURL': user.photoUrl,
-      });
+          .set(user.toMap());
       return true;
     } catch (e) {
       print('Error joining chat room: $e');
       return false;
     }
   }
+
   Future<bool> exitRoom(UserModel user, {UserModel? newHost}) async {
     try {
       final membersRef = FirebaseFirestore.instance
@@ -77,12 +79,14 @@ class ChatRoom with ChangeNotifier{
           .where((member) => member.uid != user.uid)
           .toList();
 
+      UserModel? host = await hostStream.first;
       if (remainingMembers.isEmpty) {
         await FirebaseFirestore.instance
             .collection('chatRooms')
             .doc(id)
             .delete();
-      } else if (host.uid == user.uid) {
+      }
+      else if (host != null && host.uid == user.uid) {
         UserModel newHostUser = newHost ?? remainingMembers.first;
         await setHost(newHostUser);
       }
@@ -96,24 +100,22 @@ class ChatRoom with ChangeNotifier{
 
   Future<bool> setHost(UserModel newHostUser) async {
     try {
+      final hostData = newHostUser.toMap();
+
       await FirebaseFirestore.instance
           .collection('chatRooms')
           .doc(id)
           .update({
-        'host': {
-          'uid': newHostUser.uid,
-          'displayName': newHostUser.displayName,
-          'email': newHostUser.email,
-          'photoURL': newHostUser.photoUrl,
-        },
+        'host': hostData,
       });
-      sayneToast("호스트 ${newHostUser.email} 에게 위임성공");
-      host = newHostUser; // host 속성을 업데이트하면서 notifyListeners()를 호출합니다.
-      notifyListeners();
+
+      sayneToast("호스트 ${newHostUser.email} 지정 성공");
       return true;
     } catch (e) {
       print('Error setting chat room host: $e');
       return false;
     }
   }
+
+
 }
