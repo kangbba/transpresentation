@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
-import 'package:transpresentation/auth_provider.dart';
+import 'package:transpresentation/classes/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/screens/changing_nickname_screen.dart';
 import 'package:transpresentation/room_screens/room_screen.dart';

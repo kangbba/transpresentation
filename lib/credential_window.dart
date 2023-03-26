@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'auth_provider.dart';
+import 'classes/auth_provider.dart';
 
 class CredentialWindow extends StatefulWidget {
   const CredentialWindow({Key? key}) : super(key: key);

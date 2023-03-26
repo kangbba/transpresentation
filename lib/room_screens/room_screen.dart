@@ -5,10 +5,10 @@ import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_screen.dart';
 import 'package:transpresentation/screens/selecting_room_screen.dart';
 
-import '../auth_provider.dart';
-import '../chat_provider.dart';
-import '../chat_room.dart';
-import '../user_model.dart';
+import '../classes/auth_provider.dart';
+import '../classes/chat_provider.dart';
+import '../classes/chat_room.dart';
+import '../classes/user_model.dart';
 import 'audience_screen.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
@@ -65,32 +65,46 @@ class _RoomScreenState extends State<RoomScreen> {
             ),
           ),
         ),
-        body: StreamBuilder<UserModel?>(
-          stream: widget.chatRoom.hostStream,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) { // 호스트 정보가 있는 경우
-              final hostUserModel = snapshot.data!;
-              final curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
-              final isCurUserHost = hostUserModel.uid == curUserModel.uid;
-
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
+        body: MultiProvider(
+          providers: [
+            StreamProvider<UserModel?>(
+              create: (_) => widget.chatRoom.hostStream,
+              initialData: null,
+            ),
+            StreamProvider<List<dynamic>>(
+              create: (_) => widget.chatRoom.membersStream,
+              initialData: [],
+            ),
+          ],
+          child: Consumer2<UserModel?, List<dynamic>>(
+            builder: (_, hostSnapshot, membersSnapshot, __) {
+              if (membersSnapshot.isEmpty || hostSnapshot == null) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else {
+                final hostUserModel = hostSnapshot!;
+                final curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
+                final isCurUserHost = hostUserModel.uid == curUserModel.uid;
+                return Column(
                   children: [
-                    Align(alignment: Alignment.centerLeft, child: Text("발표자")),
+                    SizedBox(
+                        height : 50, child: Align(alignment: Alignment.centerLeft, child: Text("발표자"))),
                     _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid),
-                    isCurUserHost ? PresenterScreen() : AudienceScreen(),
+                    Expanded(child:  isCurUserHost ? PresenterScreen(chatRoom: widget.chatRoom,) : AudienceScreen(chatRoom: widget.chatRoom)),
+                    SizedBox(
+                      height: 50,
+                      child: ListTile(
+                        leading: Icon(Icons.account_box_sharp),
+                        title: Text("청취자 ${membersSnapshot.length - 1}명"),
+                      ),
+                    ),
                   ],
-                ),
-              );
-            } else { // 호스트 정보가 없는 경우
-              return Center(
-                child: Text('현재 방에 호스트가 없습니다.'),
-              );
-            }
-          },
+                );
+              }
+            },
+          ),
         ),
-
       ),
     );
   }

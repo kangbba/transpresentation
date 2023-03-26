@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:transpresentation/auth_provider.dart';
+import 'package:transpresentation/classes/auth_provider.dart';
 import 'package:transpresentation/room_screens/room_screen.dart';
-import '../chat_provider.dart';
-import '../chat_room.dart';
+import '../classes/chat_provider.dart';
+import '../classes/chat_room.dart';
 import '../helper/sayne_dialogs.dart';
-import '../user_model.dart';
+import '../classes/user_model.dart';
 import 'changing_nickname_screen.dart';
-import 'chatting_screen.dart';
+import '../testing/chatting_screen.dart';
 
 class SelectingRoomScreen extends StatefulWidget {
   @override
@@ -87,7 +87,6 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
             }
 
             final chatRooms = snapshot.data!.docs.map((doc) => ChatRoom.fromSnapshot(doc)).toList();
-
             return ListView.builder(
               itemCount: chatRooms.length,
               itemBuilder: (context, index) {

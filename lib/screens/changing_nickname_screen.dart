@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../auth_provider.dart';
+import '../classes/auth_provider.dart';
 import '../helper/sayne_dialogs.dart';
 
 class ChangingNicknameScreen extends StatefulWidget {
