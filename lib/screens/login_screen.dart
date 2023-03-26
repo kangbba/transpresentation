@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:transpresentation/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/screens/changing_nickname_screen.dart';
-import 'package:transpresentation/screens/room_screen.dart';
+import 'package:transpresentation/room_screens/room_screen.dart';
 import 'package:transpresentation/screens/selecting_room_screen.dart';
 import 'package:transpresentation/screens/signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';

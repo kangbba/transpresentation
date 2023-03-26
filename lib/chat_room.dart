@@ -39,32 +39,39 @@ class ChatRoom{
       return UserModel.fromMap(hostData);
     });
   }
-
-
   factory ChatRoom.fromSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
 
+    final createdAtDate = data['createdAt'] as Timestamp?;
+    final createdAt = createdAtDate!.toDate();
     return ChatRoom(
       id: snapshot.id,
       name: data['name'],
-      createdAt: (data['createdAt'] as Timestamp).toDate(),
+      createdAt: createdAt,
     );
   }
   Future<bool> joinRoom(UserModel user) async {
     try {
-      await FirebaseFirestore.instance
+      final memberRef = FirebaseFirestore.instance
           .collection('chatRooms')
           .doc(id)
           .collection('members')
-          .doc(user.uid)
-          .set(user.toMap());
-      return true;
+          .doc(user.uid);
+
+      final memberDoc = await memberRef.get();
+      if (memberDoc.exists) {
+        // 이미 멤버인 경우
+        return true;
+      } else {
+        // 멤버가 아닌 경우, 추가
+        await memberRef.set(user.toMap());
+        return true;
+      }
     } catch (e) {
       print('Error joining chat room: $e');
       return false;
     }
   }
-
   Future<bool> exitRoom(UserModel user, {UserModel? newHost}) async {
     try {
       final membersRef = FirebaseFirestore.instance
