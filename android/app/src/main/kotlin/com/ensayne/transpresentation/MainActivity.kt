@@ -1,4 +1,4 @@
-package com.example.transpresentation
+package com.ensayne.transpresentation
 
 import io.flutter.embedding.android.FlutterActivity
 

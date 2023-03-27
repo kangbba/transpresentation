@@ -89,11 +89,11 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
+            VALUE "CompanyName", "com.ensayne" "\0"
             VALUE "FileDescription", "transpresentation" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "transpresentation" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2023 com.example. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2023 com.ensayne. All rights reserved." "\0"
             VALUE "OriginalFilename", "transpresentation.exe" "\0"
             VALUE "ProductName", "transpresentation" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

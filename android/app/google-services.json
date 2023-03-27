@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "287681615740",
+    "project_id": "transpresentation",
+    "storage_bucket": "transpresentation.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287681615740:android:2ab85f3794baf9f0dab6f9",
+        "android_client_info": {
+          "package_name": "com.ensayne.transpresentation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "287681615740-dk7k2tq5oaapcebmqmkd6p4iidmavs6h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ensayne.transpresentation",
+            "certificate_hash": "4a57a23faa2dffa42efb16fcd75da6afa1fd130b"
+          }
+        },
+        {
+          "client_id": "287681615740-15uirhgvcvqgq1gk4kfc96ufqpgnrvru.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB-TfU0lArvQprsTuzLyvrwFcN7OZyXX8g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "287681615740-15uirhgvcvqgq1gk4kfc96ufqpgnrvru.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "287681615740-ns848jfgcu6n8ncauka4dmfdac4vndeg.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.ensayne.transpresentation"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
