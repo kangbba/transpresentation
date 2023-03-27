@@ -1,7 +1,13 @@
+import 'package:android_intent/android_intent.dart';
+import 'package:android_intent/flag.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speech/flutter_speech.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_speech/flutter_speech.dart';
+
+
 class SpeechRecognitionControl extends ChangeNotifier {
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -63,7 +69,32 @@ class SpeechRecognitionControl extends ChangeNotifier {
   }
 
   String _langCode = '';
-  void start(String langCode) {
+
+  deliverIntent() async{
+    try {
+      final AndroidIntent intent = AndroidIntent(
+        action: 'com.google.android.voicesearch.SPEECH_INPUT_ACTIVITY',
+        flags: [Flag.FLAG_ACTIVITY_CLEAR_TOP],
+        package: 'com.google.android.googlequicksearchbox',
+        data: Uri.parse('https://www.google.com/search?q=').toString(),
+        arguments: <String, dynamic>{
+          'android.speech.extra.DICTATION_MODE': true,
+          'android.speech.extra.MAX_RESULTS': 1,
+          'android.speech.extra.PROMPT': 'Say something',
+          'android.speech.extra.SPEECH_INPUT_MINIMUM_LENGTH_MILLIS': 300000, // 5 minutes
+        },
+      );
+
+      await intent.launch();
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+  }
+
+
+  void start(String langCode) async{
+    await deliverIntent();
+
     isCompleted = false;
     _langCode = langCode;
     _speech.activate(langCode).then((_) {

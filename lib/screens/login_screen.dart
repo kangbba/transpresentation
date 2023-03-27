@@ -170,6 +170,7 @@ class _LoginScreenState extends State<LoginScreen> {
             }
           }
         } on FirebaseAuthException catch (e) {
+          Navigator.pop(context);
           if (e.code == 'ERROR_ABORTED_BY_USER') {
             sayneToast("ERROR_ABORTED_BY_USER");
             // 사용자가 Google 로그인을 취소한 경우 처리할 코드
