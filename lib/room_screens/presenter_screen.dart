@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:lecle_volume_flutter/lecle_volume_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:transpresentation/apis/speech_to_text_control.dart';
 import '../classes/chat_room.dart';
 import '../helper/sayne_separator.dart';
 
@@ -16,6 +17,7 @@ class PresenterScreen extends StatefulWidget {
 
 class _PresenterScreenState extends State<PresenterScreen> {
   final _textController = TextEditingController();
+  SpeechToTextControl speechToTextControl = SpeechToTextControl();
   bool isRecording = false;
   String accumStr = '';
   String tmpStr = '';
@@ -25,6 +27,7 @@ class _PresenterScreenState extends State<PresenterScreen> {
     // TODO: implement initState
     super.initState();
     initAudioStreamType();
+    speechToTextControl.init();
   }
   @override
   void dispose() {
@@ -65,7 +68,7 @@ class _PresenterScreenState extends State<PresenterScreen> {
           Text(accumStr + tmpStr),
           const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
           SizedBox(
-            height: 50,
+            height: 10,
             child: ElevatedButton(
               onPressed: _onSubmit,
               child: const Text('Submit'),
@@ -84,15 +87,15 @@ class _PresenterScreenState extends State<PresenterScreen> {
         shape: MaterialStateProperty.all(CircleBorder()),
         backgroundColor: MaterialStateProperty.all(Colors.cyan[800] ),
       ),
-      onPressed: () async{
-        isRecording = !isRecording;
+      onPressed: () async {
         setState(() {
+          isRecording = !isRecording;
+          if(isRecording){
+            listeningRoutine('ko_KR');
+          }
+          else{
+          }
         });
-        if(isRecording){
-  //        listeningLoopingRoutine('ko_KR');
-        }
-        else{
-        }
       },
       child: isRecording ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
     );
@@ -108,4 +111,28 @@ class _PresenterScreenState extends State<PresenterScreen> {
       showVolumeUI: showVolumeUI,
     );
   }
+
+  listeningRoutine(String langCode) async{
+    accumStr = '';
+    speechToTextControl.listen();
+    String previousStr = '';
+    while(true){
+      if(!isRecording){
+        break;
+      }
+      if(previousStr != speechToTextControl.text){
+        previousStr = accumStr;
+        accumStr = speechToTextControl.text;
+        print("새로운 결과 업로드 $accumStr");
+        widget.chatRoom.updatePresentation(accumStr);
+        setState(() {
+
+        });
+      }
+      await Future.delayed(Duration(milliseconds: 1));
+    }
+    speechToTextControl.stopListen();
+  }
+
+
 }
