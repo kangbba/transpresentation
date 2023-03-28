@@ -53,5 +53,10 @@
     <key>NSSpeechRecognitionUsageDescription</key>
     <string>This application needs the speech recognition permission</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>시각적 편집기에서 프라이버시 - 마이크 사용 설명</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>비주얼 편집기에서 프라이버시 - 음성 인식 사용 설명</string>
+
 </dict>
 </plist>
