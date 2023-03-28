@@ -1,11 +1,7 @@
 
-import 'package:android_intent/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:lecle_volume_flutter/lecle_volume_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:transpresentation/apis/google_speech_control.dart';
-import '../apis/speech_recognition_control.dart';
 import '../classes/chat_room.dart';
 import '../helper/sayne_separator.dart';
 
@@ -93,7 +89,7 @@ class _PresenterScreenState extends State<PresenterScreen> {
         setState(() {
         });
         if(isRecording){
-          listeningLoopingRoutine('ko_KR');
+  //        listeningLoopingRoutine('ko_KR');
         }
         else{
         }
@@ -101,103 +97,6 @@ class _PresenterScreenState extends State<PresenterScreen> {
       child: isRecording ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
     );
   }
-  listeningLoopingRoutine(String langCode) async{
-    int i = 0;
-    accumStr = '';
-    while(true) {
-      if(!isRecording) {
-        break;
-      }
-      i++;
-      print('$i 번째 : 새로운 시작');
-      accumStr += await listeningRoutine(langCode);
-      await Future.delayed(Duration(milliseconds: 100));
-    }
-  }
-  listeningRoutine(String speechLocaleID) async {
-    //
-    // setVol(androidVol: 0, iOSVol: 0.0, showVolumeUI: true);
-
-    SpeechRecognitionControl speechRecognitionControl = SpeechRecognitionControl();
-    speechRecognitionControl.transcription = '';
-    speechRecognitionControl.activateSpeechRecognizer();
-    speechRecognitionControl.start(speechLocaleID);
-    while (true) {
-      // if(!_speechToTextControl.speechToText.isListening)
-      await Future.delayed(Duration(milliseconds: 0));
-      if(!isRecording){
-        print("레코드 인터럽트로 인한 break");
-        break;
-      }
-      if(speechRecognitionControl.transcription.isNotEmpty) {
-        tmpStr = speechRecognitionControl.transcription;
-        setState(() {
-
-        });
-      }
-      if(speechRecognitionControl.isCompleted)
-      {
-
-        print("speechRecognitionControl.isListening가 false이기 때문에 listening routine 탈출..");
-        print(speechRecognitionControl.transcription);
-        for(int i = 0 ; i < 50 ; i ++){
-          tmpStr = speechRecognitionControl.transcription;
-          setState(() {
-
-          });
-          await Future.delayed(Duration(milliseconds: 10));
-        }
-        break;
-      }
-    }
-    speechRecognitionControl.stop();
-    tmpStr = '';
-
-    setState(() {
-
-    });
-
-    return speechRecognitionControl.transcription;
-  }
-  // GoogleSpeechControl speechControl = GoogleSpeechControl();
-  // listeningLoopingRoutine(String langCode) async{
-  //   int i = 0;
-  //   speechControl.text = '';
-  //   bool ready =  await speechControl.initialize(langCode);
-  //   while(true) {
-  //     if(!isRecording) {
-  //       break;
-  //     }
-  //     i++;
-  //     print('$i 번째 : 새로운 시작');
-  //     await listeningRoutine();
-  //     await Future.delayed(Duration(milliseconds: 10));
-  //   }
-  // }
-  // Future<void> listeningRoutine() async {
-  //   while(!speechControl.isListening){
-  //     print("대기중");
-  //     speechControl.listen();
-  //     await Future.delayed(Duration(milliseconds: 1));
-  //   }
-  //   while (true) {
-  //     if(!isRecording){
-  //       print('break1');
-  //       break;
-  //     }
-  //     if(!speechControl.isListening){
-  //       print('break2"');
-  //       break;
-  //     }
-  //     accumStr = speechControl!.text;
-  //     setState(() {
-  //     });
-  //     await Future.delayed(Duration(milliseconds: 1));
-  //   }
-  // }
-
-
-
   Future<void> initAudioStreamType() async {
     await Volume.initAudioStream(AudioManager.streamNotification);
 

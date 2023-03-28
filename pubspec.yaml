@@ -44,12 +44,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
-  flutter_speech: ^2.0.0
-  speech_to_text: ^6.1.1
-
 
   lecle_volume_flutter: ^0.0.1+1
-  android_intent: ^2.0.0
+  google_speech: ^2.1.2
+
+
 
 dev_dependencies:
   flutter_test:
@@ -67,7 +66,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
+  assets:
+    - assets/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
