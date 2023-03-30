@@ -1,42 +1,41 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:transpresentation/classes/chat_room.dart';
+import 'package:transpresentation/classes/user_model.dart';
 class Presentation {
+  static const kIdKey = 'id';
+  static const kNameKey = 'name';
+  static const kContentKey = 'content';
+  static const kLangCodeKey = 'langCode';
+
+  // Members
   final String id;
   final String name;
-  final DateTime createdAt;
-  final String? createdBy;
-  final String? presentationMsg;
+  String langCode = '';
+  String content = '';
 
   Presentation({
     required this.id,
     required this.name,
-    required this.createdAt,
-    this.createdBy,
-    this.presentationMsg,
+    required langCode,
+    required content,
   });
 
   factory Presentation.fromMap(Map<String, dynamic> map) {
-    final createdAtDate = map['createdAt'] as Timestamp?;
-    final createdAt = createdAtDate?.toDate() ?? DateTime.now();
-
     return Presentation(
-      id: map['id'],
-      name: map['name'],
-      createdAt: createdAt,
-      createdBy: map['createdBy'],
-      presentationMsg: map['presentationMsg'],
+      id: map[kIdKey],
+      name: map[kNameKey],
+      langCode: map[kLangCodeKey],
+      content: map[kContentKey],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
-      'name': name,
-      'createdAt': Timestamp.fromDate(createdAt),
-      'createdBy': createdBy,
-      'presentationMsg': presentationMsg,
+      kIdKey: id,
+      kNameKey: name,
+      kContentKey: content,
+      kLangCodeKey: langCode,
     };
   }
-
 
 }

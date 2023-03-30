@@ -12,9 +12,7 @@ import '../classes/user_model.dart';
 import 'audience_screen.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
-  RoomScreen({super.key, required this.chatRoom});
-
-  final ChatRoom chatRoom;
+  RoomScreen({super.key});
 
   @override
   State<RoomScreen> createState() => _RoomScreenState();
@@ -25,8 +23,40 @@ class _RoomScreenState extends State<RoomScreen> {
   final _chatProvider = ChatProvider.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  late ChatRoom? chatRoom;
+
+  initializeChatRoom() async {
+    UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
+    chatRoom = await _chatProvider.createChatRoom(
+        'ChatRoom_${DateTime.now().millisecondsSinceEpoch}',
+        userModel
+    );
+
+    // chatRoom이 null이면 이전 화면으로 돌아갑니다.
+    if (chatRoom == null) {
+        await sayneConfirmDialog(context, "" , "방생성에 실패했습니다");
+       Navigator.pop(context);
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    initializeChatRoom();
+  }
   @override
   Widget build(BuildContext context) {
+    if (chatRoom == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('채팅방'),
+        ),
+        body: Center(
+          child: Text('채팅방을 불러오는 중입니다.'),
+        ),
+      );
+    }
     return WillPopScope(
       onWillPop: () async {
         if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
@@ -39,7 +69,7 @@ class _RoomScreenState extends State<RoomScreen> {
       child: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: Text(widget.chatRoom.name),
+          title: Text(chatRoom!.name),
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () => Navigator.pop(context),
@@ -60,38 +90,34 @@ class _RoomScreenState extends State<RoomScreen> {
             child: Column(
               children: [
                 Text("대화상대", textAlign: TextAlign.start,),
-                Expanded(child: RoomDisplayer(chatRoom: widget.chatRoom)),
+                Expanded(child: RoomDisplayer(chatRoom: chatRoom!)),
               ],
             ),
           ),
         ),
         body: MultiProvider(
           providers: [
-            StreamProvider<UserModel?>(
-              create: (_) => widget.chatRoom.hostStream,
-              initialData: null,
-            ),
             StreamProvider<List<dynamic>>(
-              create: (_) => widget.chatRoom.membersStream,
+              create: (_) => chatRoom!.membersStream,
               initialData: [],
             ),
           ],
-          child: Consumer2<UserModel?, List<dynamic>>(
-            builder: (_, hostSnapshot, membersSnapshot, __) {
-              if (membersSnapshot.isEmpty || hostSnapshot == null) {
+          child: Consumer<List<dynamic>>(
+            builder: (_, membersSnapshot, __) {
+              if (membersSnapshot.isEmpty) {
                 return const Center(
                   child: CircularProgressIndicator(),
                 );
               } else {
-                final hostUserModel = hostSnapshot!;
-                final curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
+                UserModel hostUserModel = chatRoom!.host;
+                UserModel curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
                 final isCurUserHost = hostUserModel.uid == curUserModel.uid;
                 return Column(
                   children: [
                     SizedBox(
                         height : 50, child: Align(alignment: Alignment.centerLeft, child: Text("발표자"))),
                     _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid),
-                    Expanded(child:  isCurUserHost ? PresenterScreen(chatRoom: widget.chatRoom,) : AudienceScreen(chatRoom: widget.chatRoom)),
+                    Expanded(child:  isCurUserHost ? PresenterScreen(chatRoom: chatRoom!,) : AudienceScreen(chatRoom: chatRoom!)),
                     SizedBox(
                       height: 50,
                       child: ListTile(
@@ -130,9 +156,9 @@ class _RoomScreenState extends State<RoomScreen> {
   _onPressedExitRoom(BuildContext context) async{
     UserModel user = UserModel.fromFirebaseUser(_authProvider.curUser!);
     Navigator.pop(context);
-    final result = await widget.chatRoom.exitRoom(user!);
-    final roomId = widget.chatRoom.id;
-    final roomName = widget.chatRoom.name;
+    final result = await chatRoom!.exitRoom(user!);
+    final roomId = chatRoom!.id;
+    final roomName = chatRoom!.name;
     // Show a confirmation dialog to the user
   }
 

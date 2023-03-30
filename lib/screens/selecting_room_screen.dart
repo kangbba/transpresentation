@@ -31,6 +31,14 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
       barrierDismissible: false,
     );
   }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseFirestore.instance.settings = Settings(
+      persistenceEnabled: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,13 +55,6 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
             IconButton(
               icon: Icon(Icons.add),
               onPressed: () async {
-                UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
-                sayneLoadingDialog(context, "방 생성중");
-                final chatRoom = await _chatProvider.createChatRoom(
-                    'ChatRoom_${DateTime.now().millisecondsSinceEpoch}',
-                    userModel
-                );
-                Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -74,6 +75,10 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('chatRooms').snapshots(),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.data == null) {
+              return Container();
+            }
+
             if (snapshot.hasError) {
               return Center(
                 child: Text('Error: ${snapshot.error}'),
@@ -94,7 +99,7 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
                 UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
                 return ListTile(
                   title: Text(chatRoom.name),
-                  subtitle: Text(chatRoom.createdAt.toString()),
+                  subtitle: Text(chatRoom.hostUid),
                   onTap: () async{
                     final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(userModel);
                     sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");

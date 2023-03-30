@@ -1,110 +1,130 @@
 
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/classes/presentation.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
-class ChatRoom{
+class ChatRoom with ChangeNotifier{
   final String id;
   final String name;
-  final DateTime createdAt;
+  late UserModel _host;
 
+  static const String kIdKey = 'id';
+  static const String kNameKey = 'name';
+  static const String kHostKey = 'host';
+  static const String kChatRoomsKey = 'chatRooms';
+  static const String kPresentationsKey = 'presentations';
+  static const String kPresentationId = 'presentation_0';
+
+  UserModel get host => _host;
+  set host(UserModel value) {
+    _host = value;
+    _updateHost(value);
+  }
+
+  //chatRoom
   ChatRoom({
     required this.id,
     required this.name,
-    required this.createdAt,
-  });
+    required UserModel host,
+  }) : _host = host;
 
-  Stream<Presentation?> get presentationStream {
-    final presentationRef = FirebaseFirestore.instance
-        .collection('chatRooms')
-        .doc(id)
-        .collection('presentations')
-        .doc('presentation')
-        .snapshots();
-
-    return presentationRef.map((docSnapshot) {
-      if (!docSnapshot.exists) {
-        return null;
-      }
-      final data = docSnapshot.data() as Map<String, dynamic>;
-      return Presentation.fromMap(data);
-    });
+  Map<String, dynamic> toMap() {
+    return {
+      kIdKey: id,
+      kNameKey: name,
+      kHostKey: host.toMap(),
+    };
   }
 
-  Future<void> updatePresentation(String presentationMsgToUpdate) async {
-    final presentationRef = FirebaseFirestore.instance
-        .collection('chatRooms')
-        .doc(id)
-        .collection('presentations')
-        .doc('presentation');
+  factory ChatRoom.fromFirebaseSnapshot(DocumentSnapshot snapshot) {
+    final data = snapshot.data() as Map<String, dynamic>;
 
-    final presentationDoc = await presentationRef.get();
-    final presentation = Presentation(
-      id: id,
-      name: '',
-      createdAt: DateTime.now(),
-      createdBy: '',
-      presentationMsg: presentationMsgToUpdate,
+    final hostData = data[kHostKey] as Map<String, dynamic>;
+    final host = UserModel.fromMap(hostData);
+
+    return ChatRoom(
+      id: data[kIdKey],
+      name: data[kNameKey],
+      host: host,
     );
+  }
+  //host
+  void _updateHost(UserModel host) {
+    FirebaseFirestore.instance
+        .collection(kChatRoomsKey)
+        .doc(id)
+        .update({
+      kHostKey: host.toMap(),
+    }).catchError((error) {
+      // handle error
+    });
+    notifyListeners();
+  }
 
-    final presentationData = presentation.toMap();
+  //presentation
 
-    if (presentationDoc.exists) {
-      presentationRef.update(presentationData);
-    } else {
-      presentationRef.set(presentationData);
+  Stream<Presentation> presentationStream() {
+    return FirebaseFirestore.instance
+        .collection(kChatRoomsKey)
+        .doc(id)
+        .collection(kPresentationsKey)
+        .doc(kPresentationId)
+        .snapshots()
+        .map((snapshot) => Presentation.fromMap(snapshot.data() ?? {}));
+  }
+
+  Future<bool> updatePresentation(String langCode, String content) async {
+    try {
+      final presentationRef = FirebaseFirestore.instance
+          .collection(ChatRoom.kChatRoomsKey)
+          .doc(id)
+          .collection(ChatRoom.kPresentationsKey)
+          .doc(kPresentationId);
+
+      final presentationSnapshot = await presentationRef.get();
+      if (!presentationSnapshot.exists) {
+        // Presentation document does not exist, create it first
+        await presentationRef.set(Presentation(
+          id: 'temp_id',
+          name: 'temp_name',
+          langCode: langCode,
+          content: content,
+        ).toMap());
+      } else {
+        // Presentation document exists, update its content and language code
+        await presentationRef.update({
+          Presentation.kContentKey: content,
+          Presentation.kLangCodeKey: langCode,
+        });
+      }
+      return true;
+    } catch (e) {
+      print('Error updating presentation content: $e');
+      return false;
     }
   }
 
 
+  // Members
+  static const kMembersKey = 'members';
+
+  CollectionReference get membersRef =>
+      FirebaseFirestore.instance.collection(kChatRoomsKey).doc(id).collection(kMembersKey);
 
   Stream<List<dynamic>> get membersStream {
-    final membersRef = FirebaseFirestore.instance
-        .collection('chatRooms')
-        .doc(id)
-        .collection('members')
-        .snapshots();
-
+    final membersRef = this.membersRef.snapshots();
     return membersRef.map((querySnapshot) => querySnapshot.docs
         .map((doc) => doc.data())
         .toList());
   }
 
-  Stream<UserModel?> get hostStream {
-    final hostRef = FirebaseFirestore.instance
-        .collection('chatRooms')
-        .doc(id)
-        .snapshots();
-
-    return hostRef.map((docSnapshot) {
-      final data = docSnapshot.data() as Map<String, dynamic>;
-      final hostData = data['host'] as Map<String, dynamic>;
-      return UserModel.fromMap(hostData);
-    });
-  }
-
-  factory ChatRoom.fromSnapshot(DocumentSnapshot snapshot) {
-    final data = snapshot.data() as Map<String, dynamic>;
-
-    final createdAtDate = data['createdAt'] as Timestamp;
-    final createdAt = createdAtDate.toDate();
-
-
-    return ChatRoom(
-      id: snapshot.id,
-      name: data['name'],
-      createdAt: createdAt,
-    );
-  }
   Future<bool> joinRoom(UserModel user) async {
     try {
-      final memberRef = FirebaseFirestore.instance
-          .collection('chatRooms')
-          .doc(id)
-          .collection('members')
-          .doc(user.uid);
+      final memberRef = this.membersRef.doc(user.uid);
 
       final memberDoc = await memberRef.get();
       if (memberDoc.exists) {
@@ -120,30 +140,26 @@ class ChatRoom{
       return false;
     }
   }
+
   Future<bool> exitRoom(UserModel user, {UserModel? newHost}) async {
     try {
-      final membersRef = FirebaseFirestore.instance
-          .collection('chatRooms')
-          .doc(id)
-          .collection('members');
       await membersRef.doc(user.uid).delete();
 
       final membersSnapshot = await membersRef.get();
       final remainingMembers = membersSnapshot.docs
-          .map((doc) => UserModel.fromSnapshot(doc))
+          .map((doc) => UserModel.fromFirebaseSnapshot(doc))
           .where((member) => member.uid != user.uid)
           .toList();
 
-      UserModel? host = await hostStream.first;
       if (remainingMembers.isEmpty) {
         await FirebaseFirestore.instance
             .collection('chatRooms')
             .doc(id)
             .delete();
       }
-      else if (host != null && host.uid == user.uid) {
+      else if (host.uid == user.uid) {
         UserModel newHostUser = newHost ?? remainingMembers.first;
-        await setHost(newHostUser);
+        host = (newHostUser);
       }
 
       return true;
@@ -153,22 +169,4 @@ class ChatRoom{
     }
   }
 
-  Future<bool> setHost(UserModel newHostUser) async {
-    try {
-      final hostData = newHostUser.toMap();
-
-      await FirebaseFirestore.instance
-          .collection('chatRooms')
-          .doc(id)
-          .update({
-        'host': hostData,
-      });
-
-      sayneToast("호스트 ${newHostUser.email} 지정 성공");
-      return true;
-    } catch (e) {
-      print('Error setting chat room host: $e');
-      return false;
-    }
-  }
 }

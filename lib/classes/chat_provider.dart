@@ -18,27 +18,34 @@ class ChatProvider with ChangeNotifier {
 
   factory ChatProvider.getInstance() => _instance;
 
-  static ChatProvider get instance => _instance;
+    static ChatProvider get instance => _instance;
 
-  Future<ChatRoom> createChatRoom(String chatRoomName, UserModel hostUserModel) async {
-    final chatRoomRef = FirebaseFirestore.instance.collection('chatRooms').doc();
-    final newChatRoom = {
-      'name': chatRoomName,
-      'createdAt': FieldValue.serverTimestamp(),
-    };
-    await chatRoomRef.set(newChatRoom);
-    final chatRoomSnapshot = await chatRoomRef.get();
-    final chatRoom = ChatRoom.fromSnapshot(chatRoomSnapshot);
-    await chatRoom.joinRoom(hostUserModel);
-    sayneToast("방 참가 성공");
-    await chatRoom.setHost(hostUserModel);
-    return chatRoom;
+  Future<ChatRoom?> createChatRoom(String chatRoomName, UserModel hostUserModel) async {
+    try {
+      final chatRoomRef = FirebaseFirestore.instance.collection(ChatRoom.kChatRoomsKey).doc();
+      final newChatRoom = ChatRoom(
+        id: chatRoomRef.id,
+        name: chatRoomName,
+        host: hostUserModel,
+      );
+      await chatRoomRef.set(newChatRoom.toMap());
+      final chatRoomSnapshot = await chatRoomRef.get();
+      final chatRoom = ChatRoom.fromFirebaseSnapshot(chatRoomSnapshot);
+      await chatRoom.joinRoom(hostUserModel);
+      sayneToast("방 참가 성공");
+      chatRoom.host = hostUserModel;
+      return chatRoom;
+    } catch (e) {
+      print("Failed to create chat room: $e");
+      return null;
+    }
   }
 
 
 
 
-  // Future<void> sendMessage(
+
+// Future<void> sendMessage(
   //     String chatRoomId,
   //     String message,
   //     UserCredential userCredential,
