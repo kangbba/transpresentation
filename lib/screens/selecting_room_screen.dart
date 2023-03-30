@@ -8,6 +8,7 @@ import '../classes/chat_provider.dart';
 import '../classes/chat_room.dart';
 import '../helper/sayne_dialogs.dart';
 import '../classes/user_model.dart';
+import '../room_screens/profile_circle.dart';
 import 'changing_nickname_screen.dart';
 import '../testing/chatting_screen.dart';
 
@@ -20,8 +21,8 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
   final _chatProvider = ChatProvider.instance;
   final _authProvider = AuthProvider.instance;
 
-  void _showChangeNicknameDialog() {
-    showDialog(
+  void _showChangeNicknameDialog() async {
+    await showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
@@ -30,7 +31,9 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
       },
       barrierDismissible: false,
     );
+    Navigator.pop(context);
   }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -58,13 +61,12 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => RoomScreen(chatRoom: chatRoom),
+                    builder: (context) => RoomScreen(chatRoomToLoad: null,),
                   ),
                 );
               },
             ),
             IconButton(
-
               icon: Icon(Icons.edit),
               onPressed: () {
                 _showChangeNicknameDialog();
@@ -75,7 +77,7 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance.collection('chatRooms').snapshots(),
           builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.data == null) {
+            if (!snapshot.hasData) {
               return Container();
             }
 
@@ -91,23 +93,20 @@ class _SelectingRoomScreenState extends State<SelectingRoomScreen> {
               );
             }
 
-            final chatRooms = snapshot.data!.docs.map((doc) => ChatRoom.fromSnapshot(doc)).toList();
+            final chatRooms = snapshot.data!.docs.map((doc) => ChatRoom.fromFirebaseSnapshot(doc)).toList();
             return ListView.builder(
               itemCount: chatRooms.length,
               itemBuilder: (context, index) {
                 final chatRoom = chatRooms[index];
-                UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
                 return ListTile(
                   title: Text(chatRoom.name),
-                  subtitle: Text(chatRoom.hostUid),
+                  leading: ProfileCircle(userModel: chatRoom.host),
+                  subtitle: Text(chatRoom.host.email),
                   onTap: () async{
-                    final isJoined = _authProvider.curUser == null ? false : await chatRoom.joinRoom(userModel);
-                    sayneToast("${_authProvider.curUser!.email} 의 방 참가 ${isJoined ? "성공" : "실패"}");
-
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RoomScreen(chatRoom: chatRoom,),
+                        builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
                       ),
                     );
                   },

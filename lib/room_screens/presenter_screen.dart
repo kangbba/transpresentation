@@ -1,8 +1,11 @@
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:lecle_volume_flutter/lecle_volume_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:transpresentation/apis/speech_to_text_control.dart';
+import 'package:transpresentation/helper/sayne_dialogs.dart';
 import '../classes/chat_room.dart';
 import '../helper/sayne_separator.dart';
 
@@ -35,15 +38,15 @@ class _PresenterScreenState extends State<PresenterScreen> {
     super.dispose();
   }
 
-  void _onSubmit() async{
-    print("_onSubmit");
-
-    final text = _textController.text.trim();
-    if (text.isNotEmpty) {
-      widget.chatRoom.updatePresentation(text);
-    }
-    _textController.clear();
-  }
+  // void _onSubmit() async{
+  //   print("_onSubmit");
+  //
+  //   final text = _textController.text.trim();
+  //   if (text.isNotEmpty) {
+  //     widget.chatRoom.updatePresentation(text);
+  //   }
+  //   _textController.clear();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -67,13 +70,13 @@ class _PresenterScreenState extends State<PresenterScreen> {
           ),
           Text(accumStr + tmpStr),
           const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
-          SizedBox(
-            height: 10,
-            child: ElevatedButton(
-              onPressed: _onSubmit,
-              child: const Text('Submit'),
-            ),
-          ),
+          // SizedBox(
+          //   height: 10,
+          //   child: ElevatedButton(
+          //     onPressed: _onSubmit,
+          //     child: const Text('Submit'),
+          //   ),
+          // ),
           _audioRecordBtn(),
         ],
       ),
@@ -85,10 +88,14 @@ class _PresenterScreenState extends State<PresenterScreen> {
       style: ButtonStyle(
         minimumSize: MaterialStateProperty.all(Size(55, 55)),
         shape: MaterialStateProperty.all(CircleBorder()),
-        backgroundColor: MaterialStateProperty.all(Colors.cyan[800] ),
+        backgroundColor: MaterialStateProperty.all(Colors.redAccent[200] ),
       ),
       onPressed: () async {
         setState(() {
+          if (Platform.isAndroid) {
+            sayneToast("해당 기기는 발표자를 지원하지 않습니다");
+            return;
+          }
           isRecording = !isRecording;
           if(isRecording){
             listeningRoutine('ko_KR');
@@ -114,6 +121,10 @@ class _PresenterScreenState extends State<PresenterScreen> {
 
   listeningRoutine(String langCode) async{
     accumStr = '';
+    bool isInitialized = await speechToTextControl.init();
+    if(!isInitialized){
+      sayneToast("아직 리스닝이 초기화되지 않았습니다");
+    }
     speechToTextControl.listen();
     String previousStr = '';
     while(true){
@@ -124,7 +135,7 @@ class _PresenterScreenState extends State<PresenterScreen> {
         previousStr = accumStr;
         accumStr = speechToTextControl.text;
         print("새로운 결과 업로드 $accumStr");
-        widget.chatRoom.updatePresentation(accumStr);
+        widget.chatRoom.updatePresentation('korea', accumStr);
         setState(() {
 
         });

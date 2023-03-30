@@ -4,6 +4,7 @@ import 'package:transpresentation/classes/auth_provider.dart';
 
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
+import '../room_screens/profile_circle.dart';
 
 class RoomDisplayer extends StatefulWidget {
   const RoomDisplayer({required this.chatRoom, Key? key}) : super(key: key);
@@ -26,19 +27,15 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        StreamProvider<UserModel?>(
-          create: (_) => widget.chatRoom.hostStream,
-          initialData: null,
-        ),
         StreamProvider<List<dynamic>>(
           create: (_) => widget.chatRoom.membersStream,
           initialData: [],
         ),
       ],
-      child: Consumer2<UserModel?, List<dynamic>>(
-        builder: (_, hostSnapshot, membersSnapshot, __) {
+      child: Consumer<List<dynamic>>(
+        builder: (_, membersSnapshot, __) {
 // 예외 처리
-          if (membersSnapshot.isEmpty || hostSnapshot == null) {
+          if (membersSnapshot.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(),
             );
@@ -46,20 +43,13 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
           final members = membersSnapshot;
           final curUserModel = UserModel.fromFirebaseUser( _authProvider.curUser!);
           final curUserUid = curUserModel.uid;
-          final hostUserUid = hostSnapshot.uid;
+          final hostUserUid = widget.chatRoom.host.uid;
           return ListView.builder(
+            shrinkWrap: true,
             itemCount: members.length,
             itemBuilder: (context, index) {
               final member = members[index];
               final UserModel userModel = UserModel.fromMap(member);
-
-              // //
-              // final uid = member['uid'];
-              // final displayName = member['displayName'];
-              // final email = member['email'];
-              // final photoURL = member['photoURL'] as String?;
-              // final isHost = uid == hostSnapshot.uid;
-
               return _memberListTile(context, userModel, curUserUid, hostUserUid);
             },
           );
@@ -71,7 +61,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
   ListTile _memberListTile(BuildContext context, UserModel userModel, String curUserUid, String hostUserUid) {
     final uid = userModel.uid;
     final displayName = userModel.displayName;
-
+    final isMe = userModel.uid == curUserUid;
     final isCurUser = userModel.uid == curUserUid;
     final isCurUserHost = curUserUid == hostUserUid;
     final isHost = userModel.uid == hostUserUid;
@@ -83,18 +73,14 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
                   showContextMenu(context, userModel, isCurUserHost && !isCurUser);
                 }
               },
-              leading: CircleAvatar(
-                backgroundImage: photoURL != null
-                    ? NetworkImage(photoURL) as ImageProvider<Object>
-                    : const AssetImage('assets/images/default_icon.png'),
+              leading: Column(
+                children: [
+                  ProfileCircle(userModel: userModel),
+                ],
               ),
-              title: Text(email.split('@')[0] + (isCurUser ? " (나)" : "")),
+              title:  Text(displayName + (isMe ? " (나)" : "")),
               subtitle: Text(email),
-              trailing: isHost
-                  ? const Text(
-                '발표자',
-                style: TextStyle(color: Colors.red),
-              )  : null,
+              trailing: isHost ? Text("발표자") : null,
             );
   }
   void showContextMenu(BuildContext context, UserModel user, bool useManagementFunction) {
@@ -129,17 +115,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
     });
   }
   void onTapListTile(BuildContext context, UserModel user) async {
-
-    bool success = await widget.chatRoom.setHost(user);
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('새 호스트로 설정되었습니다.')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('새 호스트 설정에 실패했습니다.')),
-      );
-    }
+     widget.chatRoom.setHost(user);
   }
 
 

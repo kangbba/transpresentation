@@ -2,15 +2,18 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/classes/presentation.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
+import '../exceptions/chat_room_exception.dart';
+
 class ChatRoom with ChangeNotifier{
   final String id;
   final String name;
-  late UserModel _host;
+  final UserModel host;
 
   static const String kIdKey = 'id';
   static const String kNameKey = 'name';
@@ -19,18 +22,12 @@ class ChatRoom with ChangeNotifier{
   static const String kPresentationsKey = 'presentations';
   static const String kPresentationId = 'presentation_0';
 
-  UserModel get host => _host;
-  set host(UserModel value) {
-    _host = value;
-    _updateHost(value);
-  }
-
   //chatRoom
   ChatRoom({
     required this.id,
     required this.name,
-    required UserModel host,
-  }) : _host = host;
+    required this.host,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -42,28 +39,37 @@ class ChatRoom with ChangeNotifier{
 
   factory ChatRoom.fromFirebaseSnapshot(DocumentSnapshot snapshot) {
     final data = snapshot.data() as Map<String, dynamic>;
-
-    final hostData = data[kHostKey] as Map<String, dynamic>;
-    final host = UserModel.fromMap(hostData);
-
     return ChatRoom(
-      id: data[kIdKey],
+      id: snapshot.id,
       name: data[kNameKey],
-      host: host,
+      host: UserModel.fromMap(data[kHostKey]),
     );
   }
+
   //host
-  void _updateHost(UserModel host) {
+  void setHost(UserModel host) {
     FirebaseFirestore.instance
         .collection(kChatRoomsKey)
         .doc(id)
         .update({
       kHostKey: host.toMap(),
-    }).catchError((error) {
-      // handle error
+    }).onError((error, stackTrace) {
+      print('Error setting chat room host: $error');
+      print(stackTrace);
+      throw ChatRoomException('Failed to set chat room host.');
     });
     notifyListeners();
   }
+  //hostStream
+  Stream<UserModel> hostStream() {
+    return FirebaseFirestore.instance
+        .collection(kChatRoomsKey)
+        .doc(id)
+        .snapshots()
+        .map((snapshot) =>
+        UserModel.fromMap((snapshot.data() ?? {})[kHostKey] ?? {}));
+  }
+
 
   //presentation
 
@@ -94,12 +100,14 @@ class ChatRoom with ChangeNotifier{
           langCode: langCode,
           content: content,
         ).toMap());
+        print("dd");
       } else {
         // Presentation document exists, update its content and language code
         await presentationRef.update({
           Presentation.kContentKey: content,
           Presentation.kLangCodeKey: langCode,
         });
+        print("dd2");
       }
       return true;
     } catch (e) {
@@ -109,11 +117,10 @@ class ChatRoom with ChangeNotifier{
   }
 
 
+
   // Members
   static const kMembersKey = 'members';
 
-  CollectionReference get membersRef =>
-      FirebaseFirestore.instance.collection(kChatRoomsKey).doc(id).collection(kMembersKey);
 
   Stream<List<dynamic>> get membersStream {
     final membersRef = this.membersRef.snapshots();
@@ -122,26 +129,31 @@ class ChatRoom with ChangeNotifier{
         .toList());
   }
 
+  CollectionReference get membersRef =>
+      FirebaseFirestore.instance.collection(kChatRoomsKey).doc(id).collection(kMembersKey);
+
   Future<bool> joinRoom(UserModel user) async {
     try {
-      final memberRef = this.membersRef.doc(user.uid);
-
+      final memberRef = membersRef.doc(user.uid);
       final memberDoc = await memberRef.get();
       if (memberDoc.exists) {
         // 이미 멤버인 경우
+        print("${user.email} 이미있음");
         return true;
       } else {
+        print("${user.email} 없어서 추가하겠음");
         // 멤버가 아닌 경우, 추가
         await memberRef.set(user.toMap());
         return true;
       }
     } catch (e) {
-      print('Error joining chat room: $e');
-      return false;
+      throw FirebaseException(
+          message: 'Error joining chat room: $e', code: 'join-room-error', plugin: '');
     }
   }
 
-  Future<bool> exitRoom(UserModel user, {UserModel? newHost}) async {
+
+  Future<void> exitRoom(UserModel user, {UserModel? newHost}) async {
     try {
       await membersRef.doc(user.uid).delete();
 
@@ -156,17 +168,17 @@ class ChatRoom with ChangeNotifier{
             .collection('chatRooms')
             .doc(id)
             .delete();
-      }
-      else if (host.uid == user.uid) {
+      } else if (host.uid == user.uid) {
         UserModel newHostUser = newHost ?? remainingMembers.first;
-        host = (newHostUser);
+        setHost(newHostUser);
       }
 
-      return true;
+      return;
     } catch (e) {
-      print('Error exiting chat room: $e');
-      return false;
+      throw FirebaseException(
+          message: 'Error exiting chat room: $e', code: 'exit-room-error', plugin: '');
     }
   }
+
 
 }

@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/classes/chat_room.dart';
 import 'package:transpresentation/classes/user_model.dart';
-class Presentation {
+class Presentation with ChangeNotifier{
   static const kIdKey = 'id';
   static const kNameKey = 'name';
   static const kContentKey = 'content';

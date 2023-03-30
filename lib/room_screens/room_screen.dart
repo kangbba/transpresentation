@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_screen.dart';
+import 'package:transpresentation/room_screens/profile_circle.dart';
 import 'package:transpresentation/screens/selecting_room_screen.dart';
 
 import '../classes/auth_provider.dart';
@@ -12,8 +13,8 @@ import '../classes/user_model.dart';
 import 'audience_screen.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
-  RoomScreen({super.key});
-
+  RoomScreen({Key? key, required this.chatRoomToLoad}) : super(key: key);
+  ChatRoom? chatRoomToLoad;
   @override
   State<RoomScreen> createState() => _RoomScreenState();
 }
@@ -23,20 +24,40 @@ class _RoomScreenState extends State<RoomScreen> {
   final _chatProvider = ChatProvider.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  late ChatRoom? chatRoom;
+  ChatRoom? chatRoom;
+  bool isRoomDisplayerOpen = false;
+  Stream<UserModel>? _hostStream;
 
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
-    chatRoom = await _chatProvider.createChatRoom(
-        'ChatRoom_${DateTime.now().millisecondsSinceEpoch}',
-        userModel
-    );
 
+    if(widget.chatRoomToLoad == null)
+    {
+      print("새로운 방 생성");
+      chatRoom = await _chatProvider.createChatRoom(
+          '',
+          userModel
+      );
+    }
+    else{
+      print("기존 방 입장");
+      final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
+      sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
+      chatRoom = isJoined ? widget.chatRoomToLoad : null;
+    }
+    setState(() {
+
+    });
     // chatRoom이 null이면 이전 화면으로 돌아갑니다.
     if (chatRoom == null) {
-        await sayneConfirmDialog(context, "" , "방생성에 실패했습니다");
+        await sayneConfirmDialog(context, "" , "방 로드 실패");
        Navigator.pop(context);
     }
+    else{
+      _hostStream = chatRoom!.hostStream();
+    }
+
+
   }
 
   @override
@@ -48,92 +69,133 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   Widget build(BuildContext context) {
     if (chatRoom == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('채팅방'),
-        ),
-        body: Center(
-          child: Text('채팅방을 불러오는 중입니다.'),
-        ),
-      );
+      return loading();
     }
-    return WillPopScope(
-      onWillPop: () async {
-        if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
-          Navigator.of(context).pop();
-          return false;
-        } else {
-          return true;
-        }
-      },
-      child: Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Text(chatRoom!.name),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          actions: <Widget>[
-            IconButton(
-              icon: Icon(Icons.person),
-              onPressed: () => _scaffoldKey.currentState?.openEndDrawer(),
-            ),
-            IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: () => _onPressedExitRoom(context),
-            ),
-          ],
+    return MultiProvider(
+      providers: [
+        StreamProvider<List<dynamic>>(
+          create: (_) => chatRoom!.membersStream,
+          initialData: [],
         ),
-        endDrawer: Drawer(
-          child: SafeArea(
-            child: Column(
-              children: [
-                Text("대화상대", textAlign: TextAlign.start,),
-                Expanded(child: RoomDisplayer(chatRoom: chatRoom!)),
-              ],
-            ),
-          ),
+        StreamProvider<UserModel>(
+          create: (_) => _hostStream,
+          initialData: chatRoom!.host,
         ),
-        body: MultiProvider(
-          providers: [
-            StreamProvider<List<dynamic>>(
-              create: (_) => chatRoom!.membersStream,
-              initialData: [],
-            ),
-          ],
-          child: Consumer<List<dynamic>>(
-            builder: (_, membersSnapshot, __) {
-              if (membersSnapshot.isEmpty) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
+      ],
+      child: Consumer2<List<dynamic>, UserModel>(
+        builder: (_, membersSnapshot, hostUserModel, __) {
+          if (membersSnapshot.isEmpty) {
+            return Scaffold(
+              appBar: AppBar(
+                title: Text(chatRoom!.name),
+              ),
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          }
+
+          UserModel curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
+          final isCurUserHost = hostUserModel.uid == curUserModel.uid;
+
+          return WillPopScope(
+            onWillPop: () async {
+              if (_scaffoldKey.currentState?.isEndDrawerOpen ?? false) {
+                Navigator.of(context).pop();
+                return false;
               } else {
-                UserModel hostUserModel = chatRoom!.host;
-                UserModel curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
-                final isCurUserHost = hostUserModel.uid == curUserModel.uid;
-                return Column(
-                  children: [
-                    SizedBox(
-                        height : 50, child: Align(alignment: Alignment.centerLeft, child: Text("발표자"))),
-                    _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid),
-                    Expanded(child:  isCurUserHost ? PresenterScreen(chatRoom: chatRoom!,) : AudienceScreen(chatRoom: chatRoom!)),
-                    SizedBox(
-                      height: 50,
-                      child: ListTile(
-                        leading: Icon(Icons.account_box_sharp),
-                        title: Text("청취자 ${membersSnapshot.length - 1}명"),
-                      ),
-                    ),
-                  ],
-                );
+                return true;
               }
             },
-          ),
-        ),
+            child: Scaffold(
+              key: _scaffoldKey,
+              appBar: AppBar(
+                title: Text(chatRoom!.name),
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                actions: <Widget>[
+                  IconButton(
+                    icon: Icon(Icons.exit_to_app),
+                    onPressed: () => _onPressedExitRoom(context),
+                  ),
+                ],
+              ),
+              body: Column(
+                children: [
+                  SizedBox(
+                    height: 50,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text("발표자"),
+                    ),
+                  ),
+                  _memberListTile(
+                    context,
+                    hostUserModel,
+                    curUserModel.uid,
+                    hostUserModel.uid,
+                  ),
+                  Expanded(
+                    child: isCurUserHost
+                        ? PresenterScreen(chatRoom: chatRoom!)
+                        : AudienceScreen(chatRoom: chatRoom!),
+                  ),
+                  SizedBox(
+                    height: 100,
+                    child: roomDisplayerBtn(context),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
+
+  InkWell roomDisplayerBtn(BuildContext context) {
+    return InkWell(
+                  child: Icon(Icons.account_box_sharp),
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Container(
+                          height: 400,
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 10,
+                                width: 60,
+                                margin: EdgeInsets.symmetric(vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
+                              RoomDisplayer(chatRoom: chatRoom!),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  });
+  }
+
+  Scaffold loading() {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('채팅방'),
+      ),
+      body: Center(
+        child: Text('채팅방을 불러오는 중입니다.'),
+      ),
+    );
+  }
+
+
   ListTile _memberListTile(BuildContext context, UserModel userModel, String curUserUid, String hostUserUid) {
     final uid = userModel.uid;
     final displayName = userModel.displayName;
@@ -144,11 +206,7 @@ class _RoomScreenState extends State<RoomScreen> {
     final email = userModel.email;
     final photoURL = userModel.photoURL;
     return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: photoURL != null
-            ? NetworkImage(photoURL) as ImageProvider<Object>
-            : const AssetImage('assets/images/default_icon.png'),
-      ),
+      leading: ProfileCircle(userModel: userModel,),
       title: Text(email.split('@')[0] + (isCurUser ? " (나)" : "")),
       subtitle: Text(email),
     );

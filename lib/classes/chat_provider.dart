@@ -25,15 +25,14 @@ class ChatProvider with ChangeNotifier {
       final chatRoomRef = FirebaseFirestore.instance.collection(ChatRoom.kChatRoomsKey).doc();
       final newChatRoom = ChatRoom(
         id: chatRoomRef.id,
-        name: chatRoomName,
+        name: chatRoomName == '' ? chatRoomRef.id : chatRoomName,
         host: hostUserModel,
       );
       await chatRoomRef.set(newChatRoom.toMap());
       final chatRoomSnapshot = await chatRoomRef.get();
       final chatRoom = ChatRoom.fromFirebaseSnapshot(chatRoomSnapshot);
       await chatRoom.joinRoom(hostUserModel);
-      sayneToast("방 참가 성공");
-      chatRoom.host = hostUserModel;
+      chatRoom.setHost(hostUserModel);
       return chatRoom;
     } catch (e) {
       print("Failed to create chat room: $e");
