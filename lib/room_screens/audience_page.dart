@@ -5,16 +5,16 @@ import 'package:provider/provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/presentation.dart';
 
-class AudienceScreen extends StatefulWidget {
+class AudiencePage extends StatefulWidget {
   final ChatRoom chatRoom;
 
-  const AudienceScreen({Key? key, required this.chatRoom}) : super(key: key);
+  const AudiencePage({Key? key, required this.chatRoom}) : super(key: key);
 
   @override
-  State<AudienceScreen> createState() => _AudienceScreenState();
+  State<AudiencePage> createState() => _AudiencePageState();
 }
 
-class _AudienceScreenState extends State<AudienceScreen> {
+class _AudiencePageState extends State<AudiencePage> {
 
   @override
   void initState() {

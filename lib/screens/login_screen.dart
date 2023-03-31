@@ -7,7 +7,7 @@ import 'package:transpresentation/classes/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/screens/changing_nickname_screen.dart';
 import 'package:transpresentation/room_screens/room_screen.dart';
-import 'package:transpresentation/screens/selecting_room_screen.dart';
+import 'package:transpresentation/screens/main_screen.dart';
 import 'package:transpresentation/screens/signup_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -157,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
             if(_authProvider.curUser?.displayName?.isNotEmpty ?? false){
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
+                MaterialPageRoute(builder: (context) => MainScreen()),
               );
             }
             else{
@@ -214,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
          if(_authProvider.curUser?.displayName?.isNotEmpty ?? false){
            Navigator.push(
              context,
-             MaterialPageRoute(builder: (context) => SelectingRoomScreen()),
+             MaterialPageRoute(builder: (context) => MainScreen()),
            );
          }
          else{

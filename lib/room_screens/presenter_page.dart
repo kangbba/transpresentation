@@ -9,16 +9,16 @@ import 'package:transpresentation/helper/sayne_dialogs.dart';
 import '../classes/chat_room.dart';
 import '../helper/sayne_separator.dart';
 
-class PresenterScreen extends StatefulWidget {
+class PresenterPage extends StatefulWidget {
   final ChatRoom chatRoom;
 
-  const PresenterScreen({Key? key, required this.chatRoom}) : super(key: key);
+  const PresenterPage({Key? key, required this.chatRoom}) : super(key: key);
 
   @override
-  _PresenterScreenState createState() => _PresenterScreenState();
+  _PresenterPageState createState() => _PresenterPageState();
 }
 
-class _PresenterScreenState extends State<PresenterScreen> {
+class _PresenterPageState extends State<PresenterPage> {
   final _textController = TextEditingController();
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
   bool isRecording = false;

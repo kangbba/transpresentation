@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
-import 'package:transpresentation/room_screens/presenter_screen.dart';
+import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
-import 'package:transpresentation/screens/selecting_room_screen.dart';
+import 'package:transpresentation/screens/main_screen.dart';
 
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
-import 'audience_screen.dart';
+import 'audience_page.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
   RoomScreen({Key? key, required this.chatRoomToLoad}) : super(key: key);
@@ -139,8 +139,8 @@ class _RoomScreenState extends State<RoomScreen> {
                   ),
                   Expanded(
                     child: isCurUserHost
-                        ? PresenterScreen(chatRoom: chatRoom!)
-                        : AudienceScreen(chatRoom: chatRoom!),
+                        ? PresenterPage(chatRoom: chatRoom!)
+                        : AudiencePage(chatRoom: chatRoom!),
                   ),
                   SizedBox(
                     height: 100,

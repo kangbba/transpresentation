@@ -91,8 +91,9 @@ class ChatRoom with ChangeNotifier{
           .collection(ChatRoom.kPresentationsKey)
           .doc(kPresentationId);
 
-      final presentationSnapshot = await presentationRef.get();
-      if (!presentationSnapshot.exists) {
+      final presentationQuerySnapshot = await presentationRef.get();
+      final presentationSnapshot = presentationQuerySnapshot.data();
+      if (presentationSnapshot == null) {
         // Presentation document does not exist, create it first
         await presentationRef.set(Presentation(
           id: 'temp_id',
@@ -155,7 +156,13 @@ class ChatRoom with ChangeNotifier{
 
   Future<void> exitRoom(UserModel user, {UserModel? newHost}) async {
     try {
-      await membersRef.doc(user.uid).delete();
+      final userDoc = await membersRef.doc(user.uid).get();
+      if (!userDoc.exists) {
+        sayneToast("해당 방에 내가 없습니다");
+        return; // 해당 사용자가 채팅방 멤버가 아니면 삭제하지 않음
+      }
+
+      await userDoc.reference.delete();
 
       final membersSnapshot = await membersRef.get();
       final remainingMembers = membersSnapshot.docs
@@ -165,7 +172,7 @@ class ChatRoom with ChangeNotifier{
 
       if (remainingMembers.isEmpty) {
         await FirebaseFirestore.instance
-            .collection('chatRooms')
+            .collection(kChatRoomsKey)
             .doc(id)
             .delete();
       } else if (host.uid == user.uid) {
@@ -179,6 +186,7 @@ class ChatRoom with ChangeNotifier{
           message: 'Error exiting chat room: $e', code: 'exit-room-error', plugin: '');
     }
   }
+
 
 
 }
