@@ -57,15 +57,17 @@ class _PresenterPageState extends State<PresenterPage> {
         children: [
           Expanded(
             child: TextField(
+              textAlign: TextAlign.center,
               decoration: InputDecoration(
                 border: InputBorder.none,
-                hintText: '테스트',
+                hintText: '마이크 버튼을 눌러 회의 시작',
               ),
               controller: _textController,
               style: TextStyle(fontSize: 30),
               maxLines: null,
               keyboardType: TextInputType.multiline,
               textInputAction: TextInputAction.newline,
+              readOnly: true,
             ),
           ),
           Text(accumStr + tmpStr),
