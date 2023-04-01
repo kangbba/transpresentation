@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/classes/chat_room.dart';
 import 'package:transpresentation/classes/user_model.dart';
-class Presentation with ChangeNotifier{
+
+class Presentation with ChangeNotifier {
   static const kIdKey = 'id';
   static const kNameKey = 'name';
   static const kContentKey = 'content';
@@ -11,22 +12,27 @@ class Presentation with ChangeNotifier{
   // Members
   final String id;
   final String name;
-  String langCode = '';
-  String content = '';
+  final String langCode;
+  final String content;
 
   Presentation({
     required this.id,
     required this.name,
-    required langCode,
-    required content,
+    required this.langCode,
+    required this.content,
   });
 
   factory Presentation.fromMap(Map<String, dynamic> map) {
+    final id = map[kIdKey] ?? '';
+    final name = map[kNameKey] ?? '';
+    final langCode = map[kLangCodeKey] ?? '';
+    final content = map[kContentKey] ?? '';
+
     return Presentation(
-      id: map[kIdKey],
-      name: map[kNameKey],
-      langCode: map[kLangCodeKey],
-      content: map[kContentKey],
+      id: id,
+      name: name,
+      langCode: langCode,
+      content: content,
     );
   }
 
@@ -38,5 +44,4 @@ class Presentation with ChangeNotifier{
       kLangCodeKey: langCode,
     };
   }
-
 }

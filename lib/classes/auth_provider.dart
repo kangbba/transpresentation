@@ -20,9 +20,6 @@ class AuthProvider with ChangeNotifier{
     return _instance!;
   }
 
-  UserCredential? _curUserCredential;
-  LoginPlatform? _curUserPlatform;
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
 
@@ -101,25 +98,6 @@ class AuthProvider with ChangeNotifier{
   }
 
 
-  UserCredential? get curUserCredential{
-    return _curUserCredential;
-  }
-  set curUserCredential(UserCredential? userCredential){
-    _curUserCredential = userCredential;
-    notifyListeners();
-  }
-  LoginPlatform? get curUserPlatform{
-    return _curUserPlatform;
-  }
-  set curUserPlatform(LoginPlatform? loginPlatform){
-    _curUserPlatform = loginPlatform;
-    notifyListeners();
-  }
-
-  void clearCurUserInformation(){
-    curUserCredential = null;
-    curUserPlatform = null;
-  }
 
   User? get curUser{
     return FirebaseAuth.instance.currentUser;

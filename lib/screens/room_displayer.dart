@@ -46,6 +46,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
           final hostUserUid = widget.chatRoom.host.uid;
           return ListView.builder(
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             itemCount: members.length,
             itemBuilder: (context, index) {
               final member = members[index];

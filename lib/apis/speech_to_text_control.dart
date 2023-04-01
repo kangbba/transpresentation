@@ -33,13 +33,19 @@ class SpeechToTextControl with ChangeNotifier {
     );
     return available;
   }
-  listen() async {
+  listen(String localeId) async {
     isListening = true;
     _speech.listen(
+        localeId: localeId,
         onResult: (result) {
           text = result.recognizedWords;
-        });
+        },
+        // onSoundLevelChange: (level) {
+        //   print('sound level stream: $level');
+        // }
+    );
   }
+
   stopListen(){
     isListening = false;
     _speech.stop();

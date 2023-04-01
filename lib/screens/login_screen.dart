@@ -38,8 +38,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
 
     loadRememberMe();
-    GoogleSignInAccount? _currentUser;
-    String _contactText = '';
     _authProvider.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
       print("으잉");
     });
@@ -149,8 +147,6 @@ class _LoginScreenState extends State<LoginScreen> {
           UserCredential userCredential = await _authProvider.signInWithGoogle();
           // 로그인이 성공한 경우, UserCredential 객체를 사용하여 로그인한 사용자의 정보를 가져옵니다.
           User user = userCredential.user!;
-          _authProvider.curUserCredential = userCredential;
-          _authProvider.curUserPlatform = LoginPlatform.google;
           sayneToast("${user.email}");
           if(mounted){
             Navigator.pop(context);
@@ -164,9 +160,10 @@ class _LoginScreenState extends State<LoginScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ChangingNicknameScreen()),
-
-
-              );
+              ).then((value) {
+                // 이전 화면으로 되돌아올 때 실행될 코드 작성
+                MaterialPageRoute(builder: (context) => MainScreen());
+              });
             }
           }
         } on FirebaseAuthException catch (e) {
@@ -207,8 +204,6 @@ class _LoginScreenState extends State<LoginScreen> {
         LocalStorage.setRecentIdLocal(email);
         print("유저가 최근 아이디를 기억해달라고 요청하였음");
       }
-      _authProvider.curUserCredential = userCredential;
-      _authProvider.curUserPlatform = LoginPlatform.standard;
       if(mounted){
         Navigator.pop(context);
          if(_authProvider.curUser?.displayName?.isNotEmpty ?? false){
@@ -218,10 +213,14 @@ class _LoginScreenState extends State<LoginScreen> {
            );
          }
          else{
+           // 현재화면에서 ChangingNicknameScreen 호출
            Navigator.push(
              context,
              MaterialPageRoute(builder: (context) => ChangingNicknameScreen()),
-           );
+           ).then((value) {
+             // 이전 화면으로 되돌아올 때 실행될 코드 작성
+             MaterialPageRoute(builder: (context) => MainScreen());
+           });
          }
       }
     } on FirebaseAuthException catch (e) {

@@ -70,18 +70,19 @@ class ChatRoom with ChangeNotifier{
         UserModel.fromMap((snapshot.data() ?? {})[kHostKey] ?? {}));
   }
 
-
-  //presentation
-
-  Stream<Presentation> presentationStream() {
+  Stream<Presentation?> presentationStream() {
     return FirebaseFirestore.instance
         .collection(kChatRoomsKey)
         .doc(id)
         .collection(kPresentationsKey)
         .doc(kPresentationId)
         .snapshots()
-        .map((snapshot) => Presentation.fromMap(snapshot.data() ?? {}));
+        .map((snapshot) => Presentation.fromMap(snapshot.data() ?? const <String, dynamic>{}));
   }
+
+
+
+
 
   Future<bool> updatePresentation(String langCode, String content) async {
     try {

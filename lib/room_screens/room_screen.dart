@@ -5,11 +5,13 @@ import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
 import 'package:transpresentation/screens/main_screen.dart';
+import 'package:transpresentation/screens/room_selecting_page.dart';
 
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
+import '../helper/sayne_separator.dart';
 import 'audience_page.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
@@ -113,40 +115,41 @@ class _RoomScreenState extends State<RoomScreen> {
                 title: Text(chatRoom!.name),
                 leading: IconButton(
                   icon: Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () => onBackPressed(context),
                 ),
-                actions: <Widget>[
+                actions: [
                   IconButton(
-                    icon: Icon(Icons.exit_to_app),
-                    onPressed: () => _onPressedExitRoom(context),
+                    icon: Icon(Icons.menu),
+                    onPressed: () {
+                      _scaffoldKey.currentState?.openEndDrawer();
+                    },
                   ),
                 ],
               ),
-              body: Column(
-                children: [
-                  SizedBox(
-                    height: 50,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text("발표자"),
+              endDrawer: roomDrawer(context),
+              body: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 20,
+                      child: Align(alignment: Alignment.centerLeft, child: Text("  발표자", textAlign: TextAlign.left, style: TextStyle(fontSize: 16),)),
                     ),
-                  ),
-                  _memberListTile(
-                    context,
-                    hostUserModel,
-                    curUserModel.uid,
-                    hostUserModel.uid,
-                  ),
-                  Expanded(
-                    child: isCurUserHost
-                        ? PresenterPage(chatRoom: chatRoom!)
-                        : AudiencePage(chatRoom: chatRoom!),
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: roomDisplayerBtn(context),
-                  )
-                ],
+                    _memberListTile(
+                      context,
+                      hostUserModel,
+                      curUserModel.uid,
+                      hostUserModel.uid,
+                    ),
+                    const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
+                    Expanded(
+                      child: isCurUserHost
+                          ? PresenterPage(chatRoom: chatRoom!)
+                          : AudiencePage(chatRoom: chatRoom!),
+                    ),
+                    const SayneSeparator(color: Colors.black54, height: 0, top: 0, bottom: 16),
+                  ],
+                ),
               ),
             ),
           );
@@ -154,10 +157,47 @@ class _RoomScreenState extends State<RoomScreen> {
       ),
     );
   }
+  Widget roomDrawer(BuildContext context) {
+    return SafeArea(
+      child: Drawer(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    // 스크롤 가능한 리스트뷰 내용
+                    SizedBox(height: 40, child: ListTile(leading: Text(" 참여자" ,style: TextStyle(fontSize: 15),))),
+                    RoomDisplayer(chatRoom: chatRoom!),
+                    SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 8),
+                    // ...
+                  ],
+                ),
+              ),
+            ),
+            // 고정된 ListTile
+            ListTile(
+              tileColor: Colors.black12,
+              leading: Icon(Icons.exit_to_app),
+              title: Text("Exit Room"),
+              onTap: () => _onPressedExitRoom(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  void onBackPressed(BuildContext context){
+    Navigator.pop(context);
+
+  }
 
   InkWell roomDisplayerBtn(BuildContext context) {
     return InkWell(
-                  child: Icon(Icons.account_box_sharp),
+                  child: Icon(Icons.person, color: Colors.cyan, size: 30,),
                   onTap: () {
                     showModalBottomSheet(
                       context: context,
@@ -196,7 +236,7 @@ class _RoomScreenState extends State<RoomScreen> {
   }
 
 
-  ListTile _memberListTile(BuildContext context, UserModel userModel, String curUserUid, String hostUserUid) {
+  Widget _memberListTile(BuildContext context, UserModel userModel, String curUserUid, String hostUserUid) {
     final uid = userModel.uid;
     final displayName = userModel.displayName;
 
@@ -207,17 +247,22 @@ class _RoomScreenState extends State<RoomScreen> {
     final photoURL = userModel.photoURL;
     return ListTile(
       leading: ProfileCircle(userModel: userModel,),
-      title: Text(email.split('@')[0] + (isCurUser ? " (나)" : "")),
-      subtitle: Text(email),
+      title: Text('${userModel.displayName}'),
+      subtitle: Text((email)),
+      trailing: Text(isCurUser ? " (나)" : ""),
     );
   }
   _onPressedExitRoom(BuildContext context) async{
+    bool? confirmation = await sayneConfirmDialog(context, "", "이 채팅방에서 나가시겠습니까?");
     UserModel user = UserModel.fromFirebaseUser(_authProvider.curUser!);
-    Navigator.pop(context);
     final result = await chatRoom!.exitRoom(user!);
     final roomId = chatRoom!.id;
     final roomName = chatRoom!.name;
     // Show a confirmation dialog to the user
+    if(confirmation == true){
+      await chatRoom!.exitRoom(user);
+      onBackPressed(context);
+    }
   }
 
 }

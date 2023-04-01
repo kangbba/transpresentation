@@ -1,91 +1,79 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:transpresentation/screens/room_selecting_page.dart';
-import 'package:transpresentation/screens/setting_screen.dart';
+import 'package:transpresentation/screens/tmp_page.dart';
 
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';
 import '../room_screens/room_screen.dart';
 import 'my_friends_page.dart';
-
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();
+}
+enum MainScreenTab {
+  friends,
+  chats,
+  tmp,
 }
 
 class _MainScreenState extends State<MainScreen> {
   final _chatProvider = ChatProvider.instance;
   final _authProvider = AuthProvider.instance;
-  int _selectedIndex = 0;
+  MainScreenTab _currentTab = MainScreenTab.chats;
 
-  final List<Widget> _widgetOptions = <Widget>[    MyFriendsPage(),    RoomSelectingPage(),    SettingScreen(),  ];
+  final List<Widget> _widgetOptions = <Widget>[
+    MyFriendsPage(),
+    RoomSelectingPage(),
+    TmpPage(),
+  ];
 
-  void _onItemTapped(int index) {
+  void _onTabSelected(MainScreenTab tab) {
     setState(() {
-      _selectedIndex = index;
+      _currentTab = tab;
     });
-  }
-
-  // void _showChangeNicknameDialog() async {
-  //   await showDialog(
-  //     context: context,
-  //     builder: (BuildContext context) {
-  //       return Dialog(
-  //         child: ChangingNicknameScreen(),
-  //       );
-  //     },
-  //     barrierDismissible: false,
-  //   );
-  //   Navigator.pop(context);
-  // }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    FirebaseFirestore.instance.settings = Settings(
-      persistenceEnabled: true,
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    String  tabTitle;
+    switch(_currentTab){
+      case MainScreenTab.friends:
+        tabTitle = "Friends";
+        break;
+      case MainScreenTab.chats:
+        tabTitle = "Meeting Rooms";
+        break;
+      case MainScreenTab.tmp:
+        tabTitle = "Tmp";
+        break;
+    }
     return WillPopScope(
       onWillPop: () async {
-        // 뒤로 가기 버튼이 눌렸을 때의 동작을 작성합니다.
-        return false; // 뒤로 가기 버튼을 무시합니다.
+        return false;
       },
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading : false,
-          title: Text('Chat Rooms'),
+          automaticallyImplyLeading: false,
+          title: Text(tabTitle),
           actions: [
-            IconButton(
-              icon: Icon(Icons.add),
-              onPressed: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => RoomScreen(chatRoomToLoad: null,),
-                  ),
-                );
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.more),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SettingScreen(),
-                  ),
-                );
-              },
-            ),
+            if (_currentTab == MainScreenTab.chats)
+              IconButton(
+                icon: Image.asset('assets/new_chat.png', color: Colors.white,),
+                onPressed: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RoomScreen(
+                        chatRoomToLoad: null,
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
         body: Center(
-          child: _widgetOptions.elementAt(_selectedIndex),
+          child: _widgetOptions.elementAt(_currentTab.index),
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
@@ -98,12 +86,14 @@ class _MainScreenState extends State<MainScreen> {
               label: 'Chats',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: Icon(Icons.ac_unit_sharp),
+              label: 'Tmp',
             ),
           ],
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
+          currentIndex: _currentTab.index,
+          onTap: (index) {
+            _onTabSelected(MainScreenTab.values[index]);
+          },
         ),
       ),
     );
