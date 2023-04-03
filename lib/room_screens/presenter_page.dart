@@ -1,15 +1,18 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
 import 'package:transpresentation/apis/speech_to_text_control.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import '../classes/chat_room.dart';
+import '../classes/language_select_control.dart';
 import '../helper/sayne_separator.dart';
 
 class PresenterPage extends StatefulWidget {
   final ChatRoom chatRoom;
+  final LanguageSelectControl languageSelectControl;
 
-  const PresenterPage({Key? key, required this.chatRoom}) : super(key: key);
+  const PresenterPage({Key? key, required this.chatRoom, required this.languageSelectControl}) : super(key: key);
 
   @override
   _PresenterPageState createState() => _PresenterPageState();
@@ -37,21 +40,32 @@ class _PresenterPageState extends State<PresenterPage> {
   @override
   Widget build(BuildContext context) {
     print(accumStr + tmpStr);
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: Text(
-              accumStr + tmpStr,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20,),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: widget.languageSelectControl),
+      ],
+      child: Consumer<LanguageSelectControl>(
+        builder: (context, languageControl, child) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: Center(
+                    child: Text(
+                      accumStr + tmpStr,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20,),
+                    ),
+                  ),
+                ),
+                const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
+                _audioRecordBtn(),
+              ],
             ),
-          ),
-          const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
-          _audioRecordBtn(),
-        ],
+          );
+        },
       ),
     );
   }
@@ -71,7 +85,7 @@ class _PresenterPageState extends State<PresenterPage> {
           }
           isRecording = !isRecording;
           if(isRecording){
-            listeningRoutine('ko');
+            listeningRoutine(widget.languageSelectControl.myLanguageItem.speechLocaleId!);
           }
           else{
           }

@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
-import 'package:transpresentation/screens/main_screen.dart';
-import 'package:transpresentation/screens/room_selecting_page.dart';
 
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';
 import '../classes/chat_room.dart';
+import '../classes/language_select_control.dart';
 import '../classes/user_model.dart';
 import '../helper/sayne_separator.dart';
+import '../screens/language_select_screen.dart';
 import 'audience_page.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
@@ -24,12 +23,12 @@ class RoomScreen extends StatefulWidget {
 class _RoomScreenState extends State<RoomScreen> {
   final _authProvider = AuthProvider.instance;
   final _chatProvider = ChatProvider.instance;
+  final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   ChatRoom? chatRoom;
   bool isRoomDisplayerOpen = false;
   Stream<UserModel>? _hostStream;
-
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
@@ -59,6 +58,9 @@ class _RoomScreenState extends State<RoomScreen> {
       _hostStream = chatRoom!.hostStream();
     }
 
+    setState(() {
+
+    });
 
   }
 
@@ -67,6 +69,7 @@ class _RoomScreenState extends State<RoomScreen> {
     // TODO: implement initState
     super.initState();
     initializeChatRoom();
+
   }
   @override
   Widget build(BuildContext context) {
@@ -82,6 +85,9 @@ class _RoomScreenState extends State<RoomScreen> {
         StreamProvider<UserModel>(
           create: (_) => _hostStream,
           initialData: chatRoom!.host,
+        ),
+        ListenableProvider<LanguageSelectControl>(
+          create: (_) => _languageSelectControl,
         ),
       ],
       child: Consumer2<List<dynamic>, UserModel>(
@@ -142,10 +148,11 @@ class _RoomScreenState extends State<RoomScreen> {
                       hostUserModel.uid,
                     ),
                     const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
+                    languageSelectScreenBtn(isCurUserHost),
                     Expanded(
                       child: isCurUserHost
-                          ? PresenterPage(chatRoom: chatRoom!)
-                          : AudiencePage(chatRoom: chatRoom!),
+                          ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
+                          : AudiencePage(chatRoom: chatRoom!)!,
                     ),
                     const SayneSeparator(color: Colors.black54, height: 0, top: 0, bottom: 16),
                   ],
@@ -253,7 +260,7 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
   _onPressedExitRoom(BuildContext context) async{
-    bool? confirmation = await sayneConfirmDialog(context, "", "이 채팅방에서 나가시겠습니까?");
+    bool? confirmation = await sayneAskDialog(context, "", "이 채팅방에서 나가시겠습니까?");
     UserModel user = UserModel.fromFirebaseUser(_authProvider.curUser!);
     final result = await chatRoom!.exitRoom(user!);
     final roomId = chatRoom!.id;
@@ -265,4 +272,46 @@ class _RoomScreenState extends State<RoomScreen> {
     }
   }
 
+  Widget languageSelectScreenBtn(bool isHost) {
+    return Consumer<LanguageSelectControl>(
+      builder: (context, languageSelectControl, child) {
+        return InkWell(
+          onTap: () {
+            late LanguageSelectScreen myLanguageSelectScreen =
+            LanguageSelectScreen(
+              isHost: isHost,
+              languageSelectControl: languageSelectControl,
+            );
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: Padding(
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: myLanguageSelectScreen,
+                  ),
+                );
+              },
+            );
+            setState(() {
+            });
+          },
+          child: SizedBox(
+            height: 30,
+            child: Align(
+              alignment: Alignment.center,
+              child: Text(
+                "${languageSelectControl.myLanguageItem.menuDisplayStr} 으로 ${isHost ? '발표하기' : '보기'}",
+                style: TextStyle(fontSize: 16, color: Colors.black87),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 }
