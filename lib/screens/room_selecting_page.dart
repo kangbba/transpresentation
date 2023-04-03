@@ -51,9 +51,9 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
             return Slidable(
               key: Key(chatRoom.id),
               child: ListTile(
-                title: Text(chatRoom.name),
+                title: Text("${chatRoom.name}"),
                 leading: ProfileCircle(userModel: chatRoom.host),
-                subtitle: Text(chatRoom.host.email),
+                subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
                 onTap: () async {
                   Navigator.push(
                     context,
