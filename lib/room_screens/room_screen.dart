@@ -137,10 +137,6 @@ class _RoomScreenState extends State<RoomScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 20,
-                      child: Align(alignment: Alignment.centerLeft, child: Text("  발표자", textAlign: TextAlign.left, style: TextStyle(fontSize: 16),)),
-                    ),
                     _memberListTile(
                       context,
                       hostUserModel,
@@ -148,13 +144,13 @@ class _RoomScreenState extends State<RoomScreen> {
                       hostUserModel.uid,
                     ),
                     const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
-                    languageSelectScreenBtn(isCurUserHost),
                     Expanded(
                       child: isCurUserHost
                           ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
                           : AudiencePage(chatRoom: chatRoom!)!,
                     ),
-                    const SayneSeparator(color: Colors.black54, height: 0, top: 0, bottom: 16),
+                    const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 16),
+                    languageSelectScreenBtn(isCurUserHost),
                   ],
                 ),
               ),
@@ -253,8 +249,8 @@ class _RoomScreenState extends State<RoomScreen> {
     final email = userModel.email;
     final photoURL = userModel.photoURL;
     return ListTile(
-      leading: ProfileCircle(userModel: userModel,),
-      title: Text('${userModel.displayName}'),
+      leading: ProfileCircle(userModel: userModel, radius: 20,),
+      title: Text('<발표자> ${userModel.displayName}', style: TextStyle(color: Colors.black, fontSize: 17),),
       subtitle: Text((email)),
       trailing: Text(isCurUser ? " (나)" : ""),
     );
@@ -275,38 +271,42 @@ class _RoomScreenState extends State<RoomScreen> {
   Widget languageSelectScreenBtn(bool isHost) {
     return Consumer<LanguageSelectControl>(
       builder: (context, languageSelectControl, child) {
-        return InkWell(
-          onTap: () {
-            late LanguageSelectScreen myLanguageSelectScreen =
-            LanguageSelectScreen(
-              isHost: isHost,
-              languageSelectControl: languageSelectControl,
-            );
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return Dialog(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
+        return Align(
+          alignment: Alignment.centerLeft,
+          child: InkWell(
+            onTap: () {
+              late LanguageSelectScreen myLanguageSelectScreen =
+              LanguageSelectScreen(
+                isHost: isHost,
+                languageSelectControl: languageSelectControl,
+              );
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return Dialog(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: Padding(
+                      padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: myLanguageSelectScreen,
+                    ),
+                  );
+                },
+              );
+              setState(() {
+              });
+            },
+            child: SizedBox(
+              height: 50,
+              child: Column(
+                children: [
+                  Text("   ${languageSelectControl.myLanguageItem.menuDisplayStr} 으로 ${isHost ? '발표 하는 중' : '보는중'}"),
+                  Text( "   국가 변경하기   ", textAlign: TextAlign.left,
+                    style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
-                  child: Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: myLanguageSelectScreen,
-                  ),
-                );
-              },
-            );
-            setState(() {
-            });
-          },
-          child: SizedBox(
-            height: 30,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                "${languageSelectControl.myLanguageItem.menuDisplayStr} 으로 ${isHost ? '발표하기' : '보기'}",
-                style: TextStyle(fontSize: 16, color: Colors.black87),
+                ],
               ),
             ),
           ),

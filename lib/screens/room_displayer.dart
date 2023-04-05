@@ -74,11 +74,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
                   showContextMenu(context, userModel, isCurUserHost && !isCurUser);
                 }
               },
-              leading: Column(
-                children: [
-                  ProfileCircle(userModel: userModel),
-                ],
-              ),
+              leading: ProfileCircle(userModel: userModel, radius: 20,),
               title:  Text(displayName + (isMe ? " (나)" : "")),
               subtitle: Text(email),
               trailing: isHost ? Text("발표자") : null,

@@ -19,20 +19,44 @@ class AudiencePage extends StatefulWidget {
 }
 
 class _AudiencePageState extends State<AudiencePage> {
-  late StreamSubscription<Presentation?> _presentationSubscription;
+  StreamSubscription<Presentation?>? _presentationSubscription;
   String curContent = '';
+  final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
   @override
   void initState() {
     super.initState();
     translateByGoogleServer.initializeTranslateByGoogleServer();
-    listenToPresentationStream();
+    listenToPresentationStream(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
+    languageCodeChangeDetector();
   }
-  void listenToPresentationStream() async {
-    _presentationSubscription = widget.chatRoom!.presentationStream().listen(
-          (presentation) async {
+  void languageCodeChangeDetector() async {
+    String previousLanguageCode = _languageSelectControl.myLanguageItem.langCodeGoogleServer!;
+    while (true) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      String currentLanguageCode = _languageSelectControl.myLanguageItem.langCodeGoogleServer!;
+      if (previousLanguageCode != currentLanguageCode) {
+        listenToPresentationStream(currentLanguageCode);
+        previousLanguageCode = currentLanguageCode;
+      }
+    }
+  }
+
+  void listenToPresentationStream(String langCode) async {
+    if(_presentationSubscription != null){
+      _presentationSubscription!.cancel();
+    }
+    Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
+    if(firstPresentation != null){
+      curContent = firstPresentation.content;
+    }
+    else{
+      curContent = "아직 발표내용이 없습니다";
+    }
+    _presentationSubscription = widget.chatRoom!.presentationStream().listen((presentation) async {
+            print("이 루틴 작동중");
         if (presentation != null) {
-          String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, 'en');
+          String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
           curContent = translatedText ?? 'error';
           setState(() {});
         }
@@ -42,11 +66,6 @@ class _AudiencePageState extends State<AudiencePage> {
       },
     );
   }
-// 새로운 값을 처리하는 함수
-  void handleNewValue(newValue) {
-    // 새로운 값을 처리하는 코드
-  }
-
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
@@ -81,7 +100,9 @@ class _AudiencePageState extends State<AudiencePage> {
 
   @override
   void dispose() {
-    _presentationSubscription.cancel();
+    if(_presentationSubscription != null){
+      _presentationSubscription!.cancel();
+    }
     super.dispose();
   }
 

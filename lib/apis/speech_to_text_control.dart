@@ -38,11 +38,15 @@ class SpeechToTextControl with ChangeNotifier {
     _speech.listen(
         localeId: localeId,
         onResult: (result) {
-          text = result.recognizedWords;
+          bool b = result.finalResult;
+          text = result.recognizedWords ;
+          if(b){
+            print("FINAL RESULT");
+          }
         },
-        // onSoundLevelChange: (level) {
-        //   print('sound level stream: $level');
-        // }
+        onSoundLevelChange: (level) {
+          print('sound level stream: $level');
+        }
     );
   }
 

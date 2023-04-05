@@ -134,6 +134,16 @@ class ChatRoom with ChangeNotifier{
   CollectionReference get membersRef =>
       FirebaseFirestore.instance.collection(kChatRoomsKey).doc(id).collection(kMembersKey);
 
+  Stream<List<UserModel>> get userModelsStream {
+    final membersRef = FirebaseFirestore.instance
+        .collection(kChatRoomsKey)
+        .doc(id)
+        .collection(kMembersKey);
+
+    return membersRef.snapshots().map((querySnapshot) => querySnapshot.docs
+        .map((doc) => UserModel.fromMap(doc.data()))
+        .toList());
+  }
   Future<bool> joinRoom(UserModel user) async {
     try {
       final memberRef = membersRef.doc(user.uid);

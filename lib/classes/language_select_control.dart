@@ -9,16 +9,12 @@ class LanguageItem {
   late final String? menuDisplayStr;
   late final String? speechLocaleId;
   late final String? langCodeGoogleServer;
-  late final String? langCodePapagoServer;
-  late final int? langCodeArduino;
 
   LanguageItem({
     this.translateLanguage,
     this.menuDisplayStr,
     this.speechLocaleId,
     this.langCodeGoogleServer,
-    this.langCodePapagoServer,
-    this.langCodeArduino,
   });
 }
 class LanguageSelectControl with ChangeNotifier{
@@ -30,7 +26,6 @@ class LanguageSelectControl with ChangeNotifier{
   }
 
   late TranslateLanguage initialMyTranslateLanguage = TranslateLanguage.korean;
-  late TranslateLanguage initialYourTranslateLanguage = TranslateLanguage.english;
 
   late LanguageItem _myLanguageItem = findLanguageItemByTranslateLanguage(initialMyTranslateLanguage);
   LanguageItem get myLanguageItem{
@@ -41,15 +36,13 @@ class LanguageSelectControl with ChangeNotifier{
     notifyListeners();
   }
 
+
 // TODO: LanguageItem 관리
   LanguageItem findLanguageItemByTranslateLanguage(TranslateLanguage translateLanguage) {
     return languageDataList.firstWhere((item) => item.translateLanguage == translateLanguage, orElse: () => LanguageItem());
   }
   LanguageItem findLanguageItemByMenuDisplayStr(String menuDisplayStr) {
     return languageDataList.firstWhere((item) => item.menuDisplayStr == menuDisplayStr, orElse: () => LanguageItem());
-  }
-  initializeLanguageSelectControl(){
-    late LanguageItem initialMyLanguageItem = findLanguageItemByTranslateLanguage(initialMyTranslateLanguage);
   }
 
   List<LanguageItem> languageDataList = [

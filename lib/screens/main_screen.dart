@@ -85,10 +85,6 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(Icons.chat_bubble),
               label: 'Chats',
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.ac_unit_sharp),
-              label: 'Tmp',
-            ),
           ],
           currentIndex: _currentTab.index,
           onTap: (index) {

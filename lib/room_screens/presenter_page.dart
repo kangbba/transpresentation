@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:transpresentation/apis/speech_to_text_control.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import '../classes/chat_room.dart';
@@ -61,6 +62,7 @@ class _PresenterPageState extends State<PresenterPage> {
                   ),
                 ),
                 const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
+
                 _audioRecordBtn(),
               ],
             ),
@@ -71,40 +73,38 @@ class _PresenterPageState extends State<PresenterPage> {
   }
 
   Widget _audioRecordBtn() {
-    return ElevatedButton(
-      style: ButtonStyle(
-        minimumSize: MaterialStateProperty.all(Size(55, 55)),
-        shape: MaterialStateProperty.all(CircleBorder()),
-        backgroundColor: MaterialStateProperty.all(Colors.redAccent[200] ),
-      ),
-      onPressed: () async {
-        setState(() {
-          if (Platform.isAndroid) {
-            sayneToast("해당 기기는 발표자를 지원하지 않습니다");
-            return;
-          }
-          isRecording = !isRecording;
-          if(isRecording){
-            listeningRoutine(widget.languageSelectControl.myLanguageItem.speechLocaleId!);
-          }
-          else{
-          }
-        });
-      },
-      child: isRecording ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
-    );
+    return
+      RippleAnimation(
+          color: Colors.blue,
+          delay: const Duration(milliseconds: 200),
+          repeat: true,
+          minRadius: isRecording ? 35 : 0,
+          ripplesCount: 6,
+          duration: const Duration(milliseconds: 6 * 300),
+          child:ElevatedButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(Size(55, 55)),
+              shape: MaterialStateProperty.all(CircleBorder()),
+              backgroundColor: MaterialStateProperty.all(Colors.redAccent[200] ),
+            ),
+            onPressed: () async {
+              setState(() {
+                if (Platform.isAndroid) {
+                  sayneToast("해당 기기는 발표자를 지원하지 않습니다");
+                  return;
+                }
+                isRecording = !isRecording;
+                if(isRecording){
+                  listeningRoutine(widget.languageSelectControl.myLanguageItem.speechLocaleId!);
+                }
+                else{
+                }
+              });
+            },
+            child: isRecording ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
+          )
+      ) ;
   }
-  // Future<void> initAudioStreamType() async {
-  //   await Volume.initAudioStream(AudioManager.streamNotification);
-  //
-  // }
-  // setVol({int androidVol = 0, double iOSVol = 0.0, bool showVolumeUI = true}) async {
-  //   await Volume.setVol(
-  //     androidVol: androidVol,
-  //     iOSVol: iOSVol,
-  //     showVolumeUI: showVolumeUI,
-  //   );
-  // }
   listeningRoutine(String langCode) async{
     accumStr = '';
     bool isInitialized = await speechToTextControl.init();
@@ -126,7 +126,7 @@ class _PresenterPageState extends State<PresenterPage> {
 
         });
       }
-      await Future.delayed(Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
     speechToTextControl.stopListen();
   }

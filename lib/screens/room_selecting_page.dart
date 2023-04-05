@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -6,6 +8,7 @@ import 'package:transpresentation/classes/auth_provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
 import '../room_screens/profile_circle.dart';
+import '../room_screens/profile_circles.dart';
 import '../room_screens/room_screen.dart';
 
 class RoomSelectingPage extends StatefulWidget {
@@ -50,19 +53,6 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
             final chatRoom = chatRooms[index];
             return Slidable(
               key: Key(chatRoom.id),
-              child: ListTile(
-                title: Text("${chatRoom.name}"),
-                leading: ProfileCircle(userModel: chatRoom.host),
-                subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
-                onTap: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
-                    ),
-                  );
-                },
-              ),
               endActionPane: ActionPane(
                 extentRatio: 0.2,
                 motion: const ScrollMotion(),
@@ -77,10 +67,26 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
                   ),
                 ],
               ),
+              child: ListTile(
+                title: Text("회의실 (${chatRoom.name})"),
+                leading: ProfileCircle(userModel: chatRoom.host, radius: 20,),
+                subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
+                    ),
+                  );
+                },
+              ),
             );
           },
         );
       },
     );
   }
+
+
+
 }
