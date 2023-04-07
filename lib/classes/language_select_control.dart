@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 enum TranslateLanguage{
   english, spanish, french, german, chinese, arabic, russian, portuguese, italian, japanese, dutch,
@@ -19,6 +21,10 @@ class LanguageItem {
 }
 class LanguageSelectControl with ChangeNotifier{
 
+  Stream<LanguageItem> get languageItemStream => _languageItemController.stream;
+  final _languageItemController = StreamController<LanguageItem>.broadcast();
+
+
   static LanguageSelectControl? _instance;
   static LanguageSelectControl get instance {
     _instance ??= LanguageSelectControl();
@@ -33,6 +39,7 @@ class LanguageSelectControl with ChangeNotifier{
   }
   set myLanguageItem(LanguageItem value){
     _myLanguageItem = value;
+    _languageItemController.add(value);
     notifyListeners();
   }
 

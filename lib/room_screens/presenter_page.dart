@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -36,6 +37,7 @@ class _PresenterPageState extends State<PresenterPage> {
   @override
   void dispose() {
     _textController.dispose();
+    speechToTextControl.disposeSpeechToText();
     super.dispose();
   }
   @override
@@ -102,31 +104,54 @@ class _PresenterPageState extends State<PresenterPage> {
           )
       ) ;
   }
-  listeningRoutine(String langCode) async{
+  listeningRoutine(String langCode) async {
+    String recentStr = '';
+    List<String> sentencedStr = [];
+
     accumStr = '';
     bool isInitialized = await speechToTextControl.init();
-    if(!isInitialized){
+    if(!isInitialized) {
       sayneToast("아직 리스닝이 초기화되지 않았습니다");
     }
     speechToTextControl.listen(langCode);
-    String previousStr = '';
-    while(true){
-      if(!isRecording){
+
+    StreamSubscription<List<String>> sentencedSubscription;
+    sentencedSubscription = speechToTextControl.sentencedStream.listen((sentenced) {
+      sentencedStr.addAll(sentenced);
+      setState(() {
+        accumStr = '';
+        for (String str in sentencedStr) {
+          accumStr += str;
+        }
+        accumStr += recentStr;
+      });
+    });
+
+    StreamSubscription<String> recentSentenceSubscription;
+    recentSentenceSubscription = speechToTextControl.recentSentenceStream.listen((recentSentence) {
+      recentStr = recentSentence;
+      setState(() {
+        accumStr = '';
+        for (String str in sentencedStr) {
+          accumStr += str;
+        }
+        accumStr += recentStr;
+      });
+    });
+
+    while(true) {
+      if(!isRecording) {
         break;
       }
-      if(previousStr != speechToTextControl.text){
-        previousStr = accumStr;
-        accumStr = speechToTextControl.text;
-        print("새로운 결과 업로드 $accumStr");
-        widget.chatRoom.updatePresentation(langCode, accumStr);
-        setState(() {
-
-        });
-      }
       await Future.delayed(const Duration(milliseconds: 100));
+      //widget.chatRoom.updatePresentation(langCode, accumStr);
     }
     speechToTextControl.stopListen();
+
+    sentencedSubscription.cancel();
+    recentSentenceSubscription.cancel();
   }
+
 
 
 }

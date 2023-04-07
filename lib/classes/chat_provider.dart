@@ -31,7 +31,6 @@ class ChatProvider with ChangeNotifier {
       await chatRoomRef.set(newChatRoom.toMap());
       final chatRoomSnapshot = await chatRoomRef.get();
       final chatRoom = ChatRoom.fromFirebaseSnapshot(chatRoomSnapshot);
-      await chatRoom.joinRoom(hostUserModel);
       chatRoom.setHost(hostUserModel);
       return chatRoom;
     } catch (e) {

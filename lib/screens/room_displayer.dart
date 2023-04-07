@@ -16,11 +16,10 @@ class RoomDisplayer extends StatefulWidget {
 }
 
 class _RoomDisplayerState extends State<RoomDisplayer> {
-  AuthProvider _authProvider = AuthProvider.instance;
+  final AuthProvider _authProvider = AuthProvider.instance;
   @override
   void initState() {
     // TODO: implement initState
-
     super.initState();
   }
   @override
@@ -46,7 +45,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
           final hostUserUid = widget.chatRoom.host.uid;
           return ListView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: members.length,
             itemBuilder: (context, index) {
               final member = members[index];
@@ -113,6 +112,9 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
   }
   void onTapListTile(BuildContext context, UserModel user) async {
      widget.chatRoom.setHost(user);
+     setState(() {
+
+     });
   }
 
 

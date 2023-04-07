@@ -73,19 +73,7 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
                   if(!snapshot.hasData){
                     return SizedBox(height: 10,);
                   }
-                  return ListTile(
-                    title: Text("회의실 (${chatRoom.name})"),
-                    leading: ProfileCircleStack(users: snapshot.data!, maxRectangleSize : 45),
-                    subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
-                    onTap: () async {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
-                        ),
-                      );
-                    },
-                  );
+                  return chatRoomListTile(chatRoom, snapshot, context);
                 }
               ),
             );
@@ -93,6 +81,37 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
         );
       },
     );
+  }
+
+  ListTile chatRoomListTile(ChatRoom chatRoom, AsyncSnapshot<List<UserModel>> snapshot, BuildContext context) {
+    String subtitle = '';
+    int maxUsersToShow = 4;
+    for(int i = 0; i < snapshot.data!.length; i++) {
+      if(i < maxUsersToShow) {
+        subtitle += snapshot.data![i].displayName;
+        if(i != maxUsersToShow - 1 && i != snapshot.data!.length - 1) {
+          subtitle += ", ";
+        }
+      } else if(i == maxUsersToShow) {
+        subtitle += " 외 ${snapshot.data!.length - maxUsersToShow}명";
+        break;
+      }
+    }
+    subtitle += (" (${snapshot.data!.length})");
+
+    return ListTile(
+                  title: Text("${chatRoom.name}"),
+                  leading: ProfileCircleStack(users: snapshot.data!, maxRectangleSize : 45),
+                   subtitle: Text(subtitle),
+                  onTap: () async {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
+                      ),
+                    );
+                  },
+                );
   }
 
 

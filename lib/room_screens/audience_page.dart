@@ -24,49 +24,55 @@ class _AudiencePageState extends State<AudiencePage> {
   String curContent = '';
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
+  StreamSubscription<LanguageItem>? _languageSubscription;
+
   @override
   void initState() {
     super.initState();
     translateByGoogleServer.initializeTranslateByGoogleServer();
-    listenToPresentationStream(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
-    languageCodeChangeDetector();
-  }
-  void languageCodeChangeDetector() async {
-    String previousLanguageCode = _languageSelectControl.myLanguageItem.langCodeGoogleServer!;
-    while (true) {
-      await Future.delayed(const Duration(milliseconds: 100));
-      String currentLanguageCode = _languageSelectControl.myLanguageItem.langCodeGoogleServer!;
-      if (previousLanguageCode != currentLanguageCode) {
-        listenToPresentationStream(currentLanguageCode);
-        previousLanguageCode = currentLanguageCode;
-      }
-    }
+
+    updateCurContentByFirstPresentation(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
+    _languageSubscription = _languageSelectControl.languageItemStream.listen((currentLanguageItem) {
+      print("currentLanguageItem 변경이 감지됨");
+      listenToPresentationStream(currentLanguageItem.langCodeGoogleServer!);
+    });
   }
 
+  updateCurContentByFirstPresentation(String langCode) async{
+    Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
+    if(firstPresentation != null){
+      await updateCurContentByPresentation(firstPresentation, langCode);
+      print("첫 발표내용으로 해석해서 업데이트");
+    }
+    else{
+      curContent = "아직 발표내용이 없습니다";
+      print("아직 발표내용이 없습니다");
+    }
+    setState(() {});
+  }
+  updateCurContentByPresentation(Presentation presentation, String langCode) async{
+    String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
+    curContent = translatedText ?? 'error';
+    setState(() {
+
+    });
+  }
   void listenToPresentationStream(String langCode) async {
     if(_presentationSubscription != null){
       _presentationSubscription!.cancel();
     }
-    Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
-    if(firstPresentation != null){
-      curContent = firstPresentation.content;
-    }
-    else{
-      curContent = "아직 발표내용이 없습니다";
-    }
+    await updateCurContentByFirstPresentation(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
     _presentationSubscription = widget.chatRoom!.presentationStream().listen((presentation) async {
-            print("이 루틴 작동중");
-        if (presentation != null) {
-          String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
-          curContent = translatedText ?? 'error';
-          setState(() {});
-        }
-      },
-      onError: (error) {
-        print('presentationStream 에러 발생: $error');
-      },
-    );
+      if (presentation != null) {
+        print("presentation 내용 변경이 감지됨");
+        await updateCurContentByPresentation(presentation, langCode);
+      }
+    },
+    onError: (error) {
+      print('presentationStream 에러 발생: $error');
+    });
   }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -102,8 +108,9 @@ class _AudiencePageState extends State<AudiencePage> {
     if(_presentationSubscription != null){
       _presentationSubscription!.cancel();
     }
+    if(_languageSubscription != null){
+      _languageSubscription!.cancel();
+    }
     super.dispose();
   }
-
-
 }

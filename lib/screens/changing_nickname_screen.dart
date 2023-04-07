@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:transpresentation/helper/colors.dart';
 
 import '../classes/auth_provider.dart';
 import '../helper/sayne_dialogs.dart';
@@ -35,9 +36,7 @@ class _ChangingNicknameScreenState extends State<ChangingNicknameScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('닉네임 변경'),
-      ),
+      appBar: AppBar(title: Text('닉네임 설정'), backgroundColor: ColorManager.color_standard,),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
@@ -65,3 +64,4 @@ class _ChangingNicknameScreenState extends State<ChangingNicknameScreen> {
     );
   }
 }
+

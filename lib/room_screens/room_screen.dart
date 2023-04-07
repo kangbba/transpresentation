@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/helper/colors.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
@@ -15,7 +16,7 @@ import 'audience_page.dart';
 import '../screens/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
   RoomScreen({Key? key, required this.chatRoomToLoad}) : super(key: key);
-  ChatRoom? chatRoomToLoad;
+  ChatRoom chatRoomToLoad;
   @override
   State<RoomScreen> createState() => _RoomScreenState();
 }
@@ -32,20 +33,10 @@ class _RoomScreenState extends State<RoomScreen> {
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
-    if(widget.chatRoomToLoad == null)
-    {
-      print("새로운 방 생성");
-      chatRoom = await _chatProvider.createChatRoom(
-          '',
-          userModel
-      );
-    }
-    else{
-      print("기존 방 입장");
-      final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
-      sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
-      chatRoom = isJoined ? widget.chatRoomToLoad : null;
-    }
+    //참가 처리
+    final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
+    sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
+    chatRoom = isJoined ? widget.chatRoomToLoad : null;
     setState(() {
 
     });
@@ -118,6 +109,7 @@ class _RoomScreenState extends State<RoomScreen> {
             child: Scaffold(
               key: _scaffoldKey,
               appBar: AppBar(
+                backgroundColor: ColorManager.color_standard,
                 title: Text(chatRoom!.name),
                 leading: IconButton(
                   icon: Icon(Icons.arrow_back),
@@ -222,36 +214,6 @@ class _RoomScreenState extends State<RoomScreen> {
     Navigator.pop(context);
 
   }
-
-  InkWell roomDisplayerBtn(BuildContext context) {
-    return InkWell(
-        child: Icon(Icons.person, color: Colors.cyan, size: 30,),
-        onTap: () {
-          showModalBottomSheet(
-            context: context,
-            builder: (BuildContext context) {
-              return Container(
-                height: 400,
-                child: Column(
-                  children: [
-                    Container(
-                      height: 10,
-                      width: 60,
-                      margin: EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    RoomDisplayer(chatRoom: chatRoom!),
-                  ],
-                ),
-              );
-            },
-          );
-        });
-  }
-
   Scaffold loading() {
     return Scaffold(
       appBar: AppBar(
@@ -324,11 +286,12 @@ class _RoomScreenState extends State<RoomScreen> {
               });
             },
             child: SizedBox(
-              height: 50,
+              height: 60,
               child: Column(
                 children: [
                   Text("   ${languageSelectControl.myLanguageItem.menuDisplayStr} 으로 ${isHost ? '발표 하는 중' : '보는중'}"),
-                  Text( "   국가 변경하기   ", textAlign: TextAlign.left,
+                  SizedBox(height: 10,),
+                  Text( "   번역 언어 변경하기   ", textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),
                 ],

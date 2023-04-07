@@ -6,6 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 
+import 'user_model.dart';
+
 enum LoginPlatform{
   standard,
   google,
@@ -101,6 +103,12 @@ class AuthProvider with ChangeNotifier{
 
   User? get curUser{
     return FirebaseAuth.instance.currentUser;
+  }
+  UserModel? get curUserModel{
+    if(curUser == null){
+        return null;
+    }
+    return UserModel.fromFirebaseUser(curUser!);
   }
 
   Future<User?> getUserFromEmail(String email) async {
