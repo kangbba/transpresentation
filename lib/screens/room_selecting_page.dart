@@ -8,7 +8,7 @@ import 'package:transpresentation/classes/auth_provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
 import '../room_screens/profile_circle.dart';
-import '../room_screens/profile_circles.dart';
+import '../room_screens/profile_circle_stack.dart';
 import '../room_screens/room_screen.dart';
 
 class RoomSelectingPage extends StatefulWidget {
@@ -67,18 +67,26 @@ class _RoomSelectingPageState extends State<RoomSelectingPage> {
                   ),
                 ],
               ),
-              child: ListTile(
-                title: Text("회의실 (${chatRoom.name})"),
-                leading: ProfileCircle(userModel: chatRoom.host, radius: 20,),
-                subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
-                onTap: () async {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
-                    ),
+              child: StreamBuilder<List<UserModel>>(
+                stream: chatRoom.userModelsStream,
+                builder: (context, snapshot) {
+                  if(!snapshot.hasData){
+                    return SizedBox(height: 10,);
+                  }
+                  return ListTile(
+                    title: Text("회의실 (${chatRoom.name})"),
+                    leading: ProfileCircleStack(users: snapshot.data!, maxRectangleSize : 45),
+                    subtitle: Text("발표자 : ${chatRoom.host.displayName} (${chatRoom.host.email})"),
+                    onTap: () async {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RoomScreen(chatRoomToLoad: chatRoom,),
+                        ),
+                      );
+                    },
                   );
-                },
+                }
               ),
             );
           },

@@ -80,10 +80,6 @@ class ChatRoom with ChangeNotifier{
         .map((snapshot) => Presentation.fromMap(snapshot.data() ?? const <String, dynamic>{}));
   }
 
-
-
-
-
   Future<bool> updatePresentation(String langCode, String content) async {
     try {
       final presentationRef = FirebaseFirestore.instance
@@ -102,14 +98,12 @@ class ChatRoom with ChangeNotifier{
           langCode: langCode,
           content: content,
         ).toMap());
-        print("dd");
       } else {
         // Presentation document exists, update its content and language code
         await presentationRef.update({
           Presentation.kContentKey: content,
           Presentation.kLangCodeKey: langCode,
         });
-        print("dd2");
       }
       return true;
     } catch (e) {
@@ -117,8 +111,6 @@ class ChatRoom with ChangeNotifier{
       return false;
     }
   }
-
-
 
   // Members
   static const kMembersKey = 'members';
