@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Transpresentation</string>
+	<string>CHATUS</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -29,7 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.287681615740-ns848jfgcu6n8ncauka4dmfdac4vndeg</string>
+				<string>com.googleusercontent.apps.138175669643-ouq0bnurbahb7pet7kk3eloauj307seh</string>
 			</array>
 		</dict>
 	</array>

@@ -1,4 +1,4 @@
-package com.ensayne.transpresentation
+package com.ensayne.chatus
 
 import io.flutter.embedding.android.FlutterActivity
 

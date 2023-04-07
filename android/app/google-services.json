@@ -1,48 +1,49 @@
 {
   "project_info": {
-    "project_number": "287681615740",
-    "project_id": "transpresentation",
-    "storage_bucket": "transpresentation.appspot.com"
+    "project_number": "138175669643",
+    "firebase_url": "https://chatus-ef565-default-rtdb.firebaseio.com",
+    "project_id": "chatus-ef565",
+    "storage_bucket": "chatus-ef565.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:287681615740:android:2ab85f3794baf9f0dab6f9",
+        "mobilesdk_app_id": "1:138175669643:android:d4c68a371c376bf2f2bb8e",
         "android_client_info": {
-          "package_name": "com.ensayne.transpresentation"
+          "package_name": "com.ensayne.chatus"
         }
       },
       "oauth_client": [
         {
-          "client_id": "287681615740-dk7k2tq5oaapcebmqmkd6p4iidmavs6h.apps.googleusercontent.com",
+          "client_id": "138175669643-5nijffr27puopqcjio0m0fr9dvilfg2q.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.ensayne.transpresentation",
+            "package_name": "com.ensayne.chatus",
             "certificate_hash": "4a57a23faa2dffa42efb16fcd75da6afa1fd130b"
           }
         },
         {
-          "client_id": "287681615740-15uirhgvcvqgq1gk4kfc96ufqpgnrvru.apps.googleusercontent.com",
+          "client_id": "138175669643-e6e2iv0fghqs3ugvahnf72e6les7e38r.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB-TfU0lArvQprsTuzLyvrwFcN7OZyXX8g"
+          "current_key": "AIzaSyDdUx93wZsekSB23fjPldghc8l3C4ZEyFg"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "287681615740-15uirhgvcvqgq1gk4kfc96ufqpgnrvru.apps.googleusercontent.com",
+              "client_id": "138175669643-2te682b6lrks1eu5u8gp9mf6vjkclt8r.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "287681615740-ns848jfgcu6n8ncauka4dmfdac4vndeg.apps.googleusercontent.com",
+              "client_id": "138175669643-ouq0bnurbahb7pet7kk3eloauj307seh.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.ensayne.transpresentation"
+                "bundle_id": "com.ensayne.chatus"
               }
             }
           ]

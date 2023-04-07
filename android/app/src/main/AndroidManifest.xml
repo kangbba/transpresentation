@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.ensayne.transpresentation">
+    package="com.ensayne.chatus">
    <application
-        android:label="transpresentation"
+        android:label="CHATUS"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
