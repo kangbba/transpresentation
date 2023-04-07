@@ -47,25 +47,22 @@ class _PresenterPageState extends State<PresenterPage> {
       ],
       child: Consumer<LanguageSelectControl>(
         builder: (context, languageControl, child) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Center(
-                    child: Text(
-                      accumStr + tmpStr,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 20,),
-                    ),
+          return Column(
+            children: [
+              Expanded(
+                child: Container(
+                  alignment: Alignment.topLeft,
+                  child: Text(
+                    accumStr + tmpStr,
+                    style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
+                    maxLines: null,
                   ),
                 ),
-                const SayneSeparator(color: Colors.black54, height: 0.3, top: 16, bottom: 16),
-
-                _audioRecordBtn(),
-              ],
-            ),
+              ),
+              SizedBox(
+                  height: 80,
+                  child: _audioRecordBtn()),
+            ],
           );
         },
       ),

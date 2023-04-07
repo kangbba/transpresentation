@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -66,6 +67,7 @@ class _AudiencePageState extends State<AudiencePage> {
       },
     );
   }
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
@@ -74,26 +76,23 @@ class _AudiencePageState extends State<AudiencePage> {
           initialData: null,
         ),
       ],
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: Consumer<Presentation?>(
-                builder: (context, snapshot, _) {
-                  if (snapshot == null) {
-                    return Center(
-                      child: Text('발표자가 발표를 준비중입니다. '),
-                    );
-                  }
-                  else{
-                    return Center(child: Text(curContent, style: TextStyle(fontSize: 20),));
-                  }
-                },
+      child: Consumer<Presentation?>(
+        builder: (context, snapshot, _) {
+          if (snapshot == null) {
+            return Center(
+              child: Text('발표자가 발표를 준비중입니다. '),
+            );
+          } else {
+            return Container(
+              alignment: Alignment.topLeft,
+              child: Text(
+                curContent,
+                style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
+                maxLines: null,
               ),
-            ),
-          ],
-        ),
+            );
+          }
+        },
       ),
     );
   }

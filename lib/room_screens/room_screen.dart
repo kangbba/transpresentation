@@ -137,20 +137,37 @@ class _RoomScreenState extends State<RoomScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    _memberListTile(
-                      context,
-                      hostUserModel,
-                      curUserModel.uid,
-                      hostUserModel.uid,
+                    SizedBox(
+                      height: 80,
+                      child: Column(
+                        children:
+                        [
+                          _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid, ),
+                          const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
+                        ],
+                      ),
                     ),
-                    const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
+
                     Expanded(
-                      child: isCurUserHost
-                          ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
-                          : AudiencePage(chatRoom: chatRoom!)!,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Container(
+                          child :isCurUserHost
+                            ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
+                            : AudiencePage(chatRoom: chatRoom!)!,
+                        ),
+                      )
                     ),
-                    const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 16),
-                    languageSelectScreenBtn(isCurUserHost),
+
+                    SizedBox(
+                      height: 80,
+                      child: Column(
+                        children: [
+                          const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 16),
+                          languageSelectScreenBtn(isCurUserHost),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -171,7 +188,15 @@ class _RoomScreenState extends State<RoomScreen> {
                 child: Column(
                   children: <Widget>[
                     // 스크롤 가능한 리스트뷰 내용
-                    SizedBox(height: 40, child: ListTile(leading: Text(" 참여자" ,style: TextStyle(fontSize: 15),))),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, top: 12),
+                      child: Row(children: const [
+                        Icon(Icons.people, color: Colors.black45,),
+                        Text(" 참여자" ,style: TextStyle(fontSize: 15),
+                        )]
+                      ),
+                    ),
+                    SizedBox(height: 20,),
                     RoomDisplayer(chatRoom: chatRoom!),
                     SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 8),
                     // ...
@@ -200,31 +225,31 @@ class _RoomScreenState extends State<RoomScreen> {
 
   InkWell roomDisplayerBtn(BuildContext context) {
     return InkWell(
-                  child: Icon(Icons.person, color: Colors.cyan, size: 30,),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return Container(
-                          height: 400,
-                          child: Column(
-                            children: [
-                              Container(
-                                height: 10,
-                                width: 60,
-                                margin: EdgeInsets.symmetric(vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                              ),
-                              RoomDisplayer(chatRoom: chatRoom!),
-                            ],
-                          ),
-                        );
-                      },
-                    );
-                  });
+        child: Icon(Icons.person, color: Colors.cyan, size: 30,),
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                height: 400,
+                child: Column(
+                  children: [
+                    Container(
+                      height: 10,
+                      width: 60,
+                      margin: EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    RoomDisplayer(chatRoom: chatRoom!),
+                  ],
+                ),
+              );
+            },
+          );
+        });
   }
 
   Scaffold loading() {
