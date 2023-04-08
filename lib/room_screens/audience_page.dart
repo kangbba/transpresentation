@@ -25,19 +25,30 @@ class _AudiencePageState extends State<AudiencePage> {
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
   StreamSubscription<LanguageItem>? _languageSubscription;
-
+  double refreshDiff = 100;
   @override
   void initState() {
     super.initState();
     translateByGoogleServer.initializeTranslateByGoogleServer();
-
-    updateCurContentByFirstPresentation(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
+    LanguageItem curLanguageItem = _languageSelectControl.myLanguageItem;
+    //회의내용 감지를 시작한다.
+    listenToPresentationStream(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
+    //언어를 바꿔서 설정할때 재호출한다.
     _languageSubscription = _languageSelectControl.languageItemStream.listen((currentLanguageItem) {
       print("currentLanguageItem 변경이 감지됨");
       listenToPresentationStream(currentLanguageItem.langCodeGoogleServer!);
     });
   }
-
+  @override
+  void dispose() {
+    if(_presentationSubscription != null){
+      _presentationSubscription!.cancel();
+    }
+    if(_languageSubscription != null){
+      _languageSubscription!.cancel();
+    }
+    super.dispose();
+  }
   updateCurContentByFirstPresentation(String langCode) async{
     Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
     if(firstPresentation != null){
@@ -50,26 +61,35 @@ class _AudiencePageState extends State<AudiencePage> {
     }
     setState(() {});
   }
-  updateCurContentByPresentation(Presentation presentation, String langCode) async{
-    String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
-    curContent = translatedText ?? 'error';
-    setState(() {
-
-    });
-  }
   void listenToPresentationStream(String langCode) async {
+    DateTime? previousUpdate;
     if(_presentationSubscription != null){
       _presentationSubscription!.cancel();
     }
     await updateCurContentByFirstPresentation(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
     _presentationSubscription = widget.chatRoom!.presentationStream().listen((presentation) async {
       if (presentation != null) {
-        print("presentation 내용 변경이 감지됨");
-        await updateCurContentByPresentation(presentation, langCode);
+        DateTime currentUpdate = DateTime.now();
+        int diff = previousUpdate != null ? currentUpdate.difference(previousUpdate!).inMilliseconds : 0;
+        print("presentation 내용 변경이 감지됨, 시간차이: ${diff}ms");
+        if(diff > refreshDiff){
+          updateCurContentByPresentation(presentation, langCode);
+        }
+        previousUpdate = currentUpdate;
       }
     },
     onError: (error) {
       print('presentationStream 에러 발생: $error');
+    });
+  }
+
+
+  updateCurContentByPresentation(Presentation presentation, String langCode) async{
+    String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
+    curContent = translatedText ?? 'error';
+    setState(() {
+
+
     });
   }
 
@@ -89,12 +109,14 @@ class _AudiencePageState extends State<AudiencePage> {
               child: Text('발표자가 발표를 준비중입니다. '),
             );
           } else {
-            return Container(
-              alignment: Alignment.topLeft,
-              child: Text(
-                curContent,
-                style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
-                maxLines: null,
+            return SingleChildScrollView(
+              child: Container(
+                alignment: Alignment.topLeft,
+                child: Text(
+                  curContent,
+                  style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
+                  maxLines: null,
+                ),
               ),
             );
           }
@@ -103,14 +125,32 @@ class _AudiencePageState extends State<AudiencePage> {
     );
   }
 
-  @override
-  void dispose() {
-    if(_presentationSubscription != null){
-      _presentationSubscription!.cancel();
-    }
-    if(_languageSubscription != null){
-      _languageSubscription!.cancel();
-    }
-    super.dispose();
+  SizedBox refreshDiffSlider() {
+    return SizedBox(
+                width: 200,
+                height: 80,
+                child: Column(
+                  children: [
+                    Slider(
+                      value: refreshDiff,
+                      min: 1.0,
+                      max: 2000.0,
+                      divisions: 1999,
+
+                      onChanged: (double newValue) {
+                        setState(() {
+                          refreshDiff = newValue;
+                          print("감도변경 $newValue");
+                        });
+                      },
+                    ),
+                    Text(
+                      "갱신주기: ${refreshDiff.toInt()}",
+                      style: TextStyle(fontSize: 20.0),
+                    )
+                  ],
+                ),
+              );
   }
+
 }

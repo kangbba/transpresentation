@@ -14,15 +14,15 @@ class SpeechToTextControl with ChangeNotifier {
     notifyListeners();
   }
 
-  final StreamController<List<String>> _sentencedController = StreamController();
-  Stream<List<String>> get sentencedStream => _sentencedController.stream;
-  List<String> _sentenced = [];
-  List<String> get sentenced => _sentenced;
-  set sentenced(List<String> value) {
-    _sentenced = value;
-    _sentencedController.add(value);
-    notifyListeners();
-  }
+  // final StreamController<List<String>> _sentencedController = StreamController();
+  // Stream<List<String>> get sentencedStream => _sentencedController.stream;
+  // List<String> _sentenced = [];
+  // List<String> get sentenced => _sentenced;
+  // set sentenced(List<String> value) {
+  //   _sentenced = value;
+  //   _sentencedController.add(value);
+  //   notifyListeners();
+  // }
 
   final StreamController<String> _recentSentenceController = StreamController();
   Stream<String> get recentSentenceStream => _recentSentenceController.stream;
@@ -55,18 +55,8 @@ class SpeechToTextControl with ChangeNotifier {
         onResult: (result) {
           bool b = result.finalResult;
           String recognizedWords = result.recognizedWords;
-          if (recognizedWords.endsWith("니다")) {
-            _recentSentence += "$recognizedWords.";
-            _recentSentenceController.add(_recentSentence);
-            sentenced.add(_recentSentence);
-            _sentencedController.add(sentenced);
-            sentenced = [];
-            _recentSentence = '';
-          } else {
-            sentenced.add(recognizedWords);
-            _recentSentence += recognizedWords;
-            _recentSentenceController.add(_recentSentence);
-          }
+          recentSentence = recognizedWords;
+
           if (b) {
             print("FINAL RESULT");
           }
@@ -77,17 +67,9 @@ class SpeechToTextControl with ChangeNotifier {
     );
   }
 
-
   stopListen(){
     isListening = false;
     _speech.stop();
-    sentenced = [];
-    recentSentence = '';
-  }
-
-  void disposeSpeechToText() {
-    _sentencedController.close();
     _recentSentenceController.close();
-    super.dispose();
   }
 }

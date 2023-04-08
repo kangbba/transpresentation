@@ -24,8 +24,7 @@ class _PresenterPageState extends State<PresenterPage> {
   final _textController = TextEditingController();
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
   bool isRecording = false;
-  String accumStr = '';
-  String tmpStr = '';
+  String recentStr = '';
 
   @override
   void initState() {
@@ -36,13 +35,13 @@ class _PresenterPageState extends State<PresenterPage> {
   }
   @override
   void dispose() {
+    isRecording = false;
+    speechToTextControl.stopListen();
     _textController.dispose();
-    speechToTextControl.disposeSpeechToText();
     super.dispose();
   }
   @override
   Widget build(BuildContext context) {
-    print(accumStr + tmpStr);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: widget.languageSelectControl),
@@ -55,7 +54,7 @@ class _PresenterPageState extends State<PresenterPage> {
                 child: Container(
                   alignment: Alignment.topLeft,
                   child: Text(
-                    accumStr + tmpStr,
+                    recentStr,
                     style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
                     maxLines: null,
                   ),
@@ -104,54 +103,55 @@ class _PresenterPageState extends State<PresenterPage> {
           )
       ) ;
   }
-  listeningRoutine(String langCode) async {
-    String recentStr = '';
-    List<String> sentencedStr = [];
-
-    accumStr = '';
+  // listeningRoutine(String langCode) async {
+  //
+  //   speechToTextControl = SpeechToTextControl();
+  //   recentStr = '';
+  //   bool isInitialized = await speechToTextControl.init();
+  //   if(!isInitialized) {
+  //     sayneToast("아직 리스닝이 초기화되지 않았습니다");
+  //     return;
+  //   }
+  //   speechToTextControl.listen(langCode);
+  //   speechToTextControl.recentSentenceStream.listen((recentSentence) {
+  //     setState(() {
+  //       print("갱신중");
+  //       recentStr = recentSentence;
+  //       widget.chatRoom.updatePresentation(langCode, recentStr);
+  //     });
+  //   });
+  // }
+  listeningRoutine(String langCode) async{
+    widget.chatRoom.updatePresentation(langCode, '');
+    recentStr = '';
+    sayneLoadingDialog(context, "message");
     bool isInitialized = await speechToTextControl.init();
-    if(!isInitialized) {
-      sayneToast("아직 리스닝이 초기화되지 않았습니다");
+    if(!isInitialized){
+      sayneConfirmDialog(context, "", "아직 리스닝이 초기화되지 않았습니다");
+      return;
     }
+    Navigator.of(context).pop();
     speechToTextControl.listen(langCode);
-
-    StreamSubscription<List<String>> sentencedSubscription;
-    sentencedSubscription = speechToTextControl.sentencedStream.listen((sentenced) {
-      sentencedStr.addAll(sentenced);
-      setState(() {
-        accumStr = '';
-        for (String str in sentencedStr) {
-          accumStr += str;
-        }
-        accumStr += recentStr;
-      });
-    });
-
-    StreamSubscription<String> recentSentenceSubscription;
-    recentSentenceSubscription = speechToTextControl.recentSentenceStream.listen((recentSentence) {
-      recentStr = recentSentence;
-      setState(() {
-        accumStr = '';
-        for (String str in sentencedStr) {
-          accumStr += str;
-        }
-        accumStr += recentStr;
-      });
-    });
-
-    while(true) {
-      if(!isRecording) {
+    int notRefreshedTotalTime = 10;
+    int delayMs = 10;
+    while(true){
+      if(!isRecording){
         break;
       }
-      await Future.delayed(const Duration(milliseconds: 100));
-      //widget.chatRoom.updatePresentation(langCode, accumStr);
+      if(recentStr != speechToTextControl.recentSentence) {
+        notRefreshedTotalTime = 0;
+        recentStr = speechToTextControl.recentSentence;
+        widget.chatRoom.updatePresentation(langCode, recentStr);
+        setState(() {});
+      }
+      else{
+        notRefreshedTotalTime += delayMs;
+        print("비갱신 시간 : $notRefreshedTotalTime");
+      }
+      await Future.delayed(Duration(milliseconds: delayMs));
     }
     speechToTextControl.stopListen();
-
-    sentencedSubscription.cancel();
-    recentSentenceSubscription.cancel();
   }
-
 
 
 }

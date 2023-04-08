@@ -86,6 +86,7 @@ class _RoomScreenState extends State<RoomScreen> {
           if (membersSnapshot.isEmpty) {
             return Scaffold(
               appBar: AppBar(
+                backgroundColor: ColorManager.color_standard,
                 title: Text(chatRoom!.name),
               ),
               body: Center(
@@ -180,15 +181,18 @@ class _RoomScreenState extends State<RoomScreen> {
                 child: Column(
                   children: <Widget>[
                     // 스크롤 가능한 리스트뷰 내용
+                    SayneSeparator(color: Colors.black, height: 0, top: 8, bottom: 8),
+                    Text(chatRoom!.name, style: TextStyle(fontSize: 16),),
+                    SayneSeparator(color: Colors.black, height: 0.2, top: 8, bottom: 22),
                     Padding(
-                      padding: const EdgeInsets.only(left: 16, top: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(children: const [
                         Icon(Icons.people, color: Colors.black45,),
                         Text(" 참여자" ,style: TextStyle(fontSize: 15),
                         )]
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(height: 8,),
                     RoomDisplayer(chatRoom: chatRoom!),
                     SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 8),
                     // ...
@@ -217,10 +221,12 @@ class _RoomScreenState extends State<RoomScreen> {
   Scaffold loading() {
     return Scaffold(
       appBar: AppBar(
-        title: Text('채팅방'),
+        title: Text(''),
+        backgroundColor: ColorManager.color_standard,
       ),
+
       body: Center(
-        child: Text('채팅방을 불러오는 중입니다.'),
+        child: Text(''),
       ),
     );
   }

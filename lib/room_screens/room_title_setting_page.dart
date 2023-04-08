@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:transpresentation/classes/user_model.dart';
 import 'package:transpresentation/helper/sayne_separator.dart';
@@ -20,7 +22,7 @@ class _RoomTitleSettingPageState extends State<RoomTitleSettingPage> {
   @override
   void initState() {
     super.initState();
-    _textController.text = "${AuthProvider.instance.curUser!.displayName!}님의 회의공간 (${DateTime.now().month}월${DateTime.now().day}일 ${DateTime.now().hour}:${DateTime.now().minute})";
+    _textController.text = "${AuthProvider.instance.curUser!.displayName!}님의 회의공간 ${Random().nextInt(1000)} (${DateTime.now().month}월${DateTime.now().day}일 ${DateTime.now().hour}:${DateTime.now().minute})";
   }
 
   @override
