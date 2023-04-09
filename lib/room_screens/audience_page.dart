@@ -20,12 +20,14 @@ class AudiencePage extends StatefulWidget {
 }
 
 class _AudiencePageState extends State<AudiencePage> {
-  StreamSubscription<Presentation?>? _presentationSubscription;
-  String curContent = '';
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
+
+  StreamSubscription<Presentation?>? _presentationSubscription;
   StreamSubscription<LanguageItem>? _languageSubscription;
-  double refreshDiff = 100;
+
+  String curContent = '';
+
   @override
   void initState() {
     super.initState();
@@ -68,11 +70,14 @@ class _AudiencePageState extends State<AudiencePage> {
     }
     await updateCurContentByFirstPresentation(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
     _presentationSubscription = widget.chatRoom!.presentationStream().listen((presentation) async {
-      if (presentation != null) {
+      if (presentation == null) {
+        print("아직 presentation이 없습니다");
+      }
+      else{
         DateTime currentUpdate = DateTime.now();
         int diff = previousUpdate != null ? currentUpdate.difference(previousUpdate!).inMilliseconds : 0;
-        print("presentation 내용 변경이 감지됨, 시간차이: ${diff}ms");
-        if(diff > refreshDiff){
+        print("presentation 내용 변경이 감지, 시간차이: ${diff}ms");
+        if(diff > 100){
           updateCurContentByPresentation(presentation, langCode);
         }
         previousUpdate = currentUpdate;
@@ -83,13 +88,30 @@ class _AudiencePageState extends State<AudiencePage> {
     });
   }
 
+  int linesPerPage = 10;
+  List<String> pages = [];
+  int currentPage = 0;
 
   updateCurContentByPresentation(Presentation presentation, String langCode) async{
     String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
     curContent = translatedText ?? 'error';
+
+    if (curContent != null) {
+      List<String> lines = curContent!.split('\n');
+      int totalPages = (lines.length / linesPerPage).ceil();
+
+      for (int i = 0; i < totalPages; i++) {
+        int startIndex = i * linesPerPage;
+        int endIndex = (i + 1) * linesPerPage;
+        if (endIndex > lines.length) {
+          endIndex = lines.length;
+        }
+        List<String> pageLines = lines.sublist(startIndex, endIndex);
+        String pageText = pageLines.join('\n');
+        pages.add(pageText);
+      }
+    }
     setState(() {
-
-
     });
   }
 
@@ -123,34 +145,6 @@ class _AudiencePageState extends State<AudiencePage> {
         },
       ),
     );
-  }
-
-  SizedBox refreshDiffSlider() {
-    return SizedBox(
-                width: 200,
-                height: 80,
-                child: Column(
-                  children: [
-                    Slider(
-                      value: refreshDiff,
-                      min: 1.0,
-                      max: 2000.0,
-                      divisions: 1999,
-
-                      onChanged: (double newValue) {
-                        setState(() {
-                          refreshDiff = newValue;
-                          print("감도변경 $newValue");
-                        });
-                      },
-                    ),
-                    Text(
-                      "갱신주기: ${refreshDiff.toInt()}",
-                      style: TextStyle(fontSize: 20.0),
-                    )
-                  ],
-                ),
-              );
   }
 
 }

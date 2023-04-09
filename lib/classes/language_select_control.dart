@@ -54,6 +54,7 @@ class LanguageSelectControl with ChangeNotifier{
 
   List<LanguageItem> languageDataList = [
     LanguageItem(translateLanguage: TranslateLanguage.english, menuDisplayStr: "English", speechLocaleId: "en_US", langCodeGoogleServer: "en", ),
+    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", speechLocaleId: "ko_KR", langCodeGoogleServer: "ko", ),
     LanguageItem(translateLanguage: TranslateLanguage.spanish, menuDisplayStr: "Spanish", speechLocaleId: "es_ES", langCodeGoogleServer: "es", ),
     LanguageItem(translateLanguage: TranslateLanguage.french, menuDisplayStr: "French", speechLocaleId: "fr_FR", langCodeGoogleServer: "fr",  ),
     LanguageItem(translateLanguage: TranslateLanguage.german, menuDisplayStr: "German", speechLocaleId: "de_DE", langCodeGoogleServer: "de", ),
@@ -64,7 +65,6 @@ class LanguageSelectControl with ChangeNotifier{
     LanguageItem(translateLanguage: TranslateLanguage.italian, menuDisplayStr: "Italian", speechLocaleId: "it_IT", langCodeGoogleServer: "it", ),
     LanguageItem(translateLanguage: TranslateLanguage.japanese, menuDisplayStr: "Japanese", speechLocaleId: "ja_JP", langCodeGoogleServer: "ja", ),
     LanguageItem(translateLanguage: TranslateLanguage.dutch, menuDisplayStr: "Dutch", speechLocaleId: "nl_NL", langCodeGoogleServer: "nl", ),
-    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", speechLocaleId: "ko_KR", langCodeGoogleServer: "ko", ),
     LanguageItem(translateLanguage: TranslateLanguage.swedish, menuDisplayStr: "Swedish", speechLocaleId: "sv_SE", langCodeGoogleServer: "sv",),
     LanguageItem(translateLanguage: TranslateLanguage.turkish, menuDisplayStr: "Turkish", speechLocaleId: "tr_TR", langCodeGoogleServer: "tr", ),
     LanguageItem(translateLanguage: TranslateLanguage.polish, menuDisplayStr: "Polish", speechLocaleId: "pl_PL", langCodeGoogleServer: "pl", ),
