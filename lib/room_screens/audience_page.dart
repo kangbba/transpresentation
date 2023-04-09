@@ -92,9 +92,12 @@ class _AudiencePageState extends State<AudiencePage> {
   updateCurContentByPresentation(Presentation presentation, String langCode) async{
     String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
     curContent = translatedText ?? '';
-    setState(() {
 
-    });
+    if(mounted){
+      setState(() {
+
+      });
+    }
   }
 
   @override

@@ -24,14 +24,17 @@ class ContentPages extends StatefulWidget {
 }
 
 class _ContentPagesState extends State<ContentPages> {
-  int totalPages = 1;
-  int currentPage = 1;
+  late int totalPages = 1;
+  late int currentPage = 1;
+  late PageController _pageController;
   List<String>? pageContent;
-  final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
+    pageContent = _splitContentIntoPages(widget.content);
+    updatePageInfo(false);
   }
   @override
   void didUpdateWidget(ContentPages oldWidget) {
@@ -39,29 +42,47 @@ class _ContentPagesState extends State<ContentPages> {
 
     if(widget.langCode != oldWidget.langCode){
       updatePageInfo(false);
+      toFirstPage();
     }
     else if(widget.content != oldWidget.content){
       updatePageInfo(true);
     }
+
+    setState(() {
+
+    });
   }
 
-  updatePageInfo(bool useLastPage){
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+
+  updatePageInfo(bool useAutoScroll){
     pageContent = _splitContentIntoPages(widget.content);
-    int previousPageCount = totalPages;
-    int newPageCount = pageContent!.length;
-    totalPages = newPageCount;
-    if(useLastPage){
-      if(newPageCount > previousPageCount){
-        toLastPage();
-      }
+    if(pageContent == null){
+      totalPages = 1;
+      currentPage = 1;
     }
     else{
-      toFirstPage();
+      int previousPageCount = totalPages;
+      int newPageCount = pageContent!.length;
+      totalPages = newPageCount > 0 ? newPageCount : 1;
+      if(useAutoScroll){
+        if(newPageCount > previousPageCount){
+          toLastPage();
+        }
+      }
     }
   }
   static const double lineSpacing = 1.3;
 
-  List<String> _splitContentIntoPages(String content) {
+  List<String>? _splitContentIntoPages(String content) {
+    if (content.isEmpty) {
+      return null;
+    }
     List<String> pages = [];
     double lineHeight = widget.fontSize * lineSpacing;
     int maxCharsPerLine = (widget.width ~/ widget.fontSize).toInt();

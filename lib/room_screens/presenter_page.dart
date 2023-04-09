@@ -132,8 +132,8 @@ class _PresenterPageState extends State<PresenterPage> {
     }
     Navigator.of(context).pop();
     speechToTextControl.listen(langCode);
-    int notRefreshedTotalTime = 10;
-    int delayMs = 10;
+    int notRefreshedTotalTime = 0;
+    int delayMs = 50;
     while(true){
       if(!isRecording){
         break;
