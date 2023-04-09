@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 
@@ -21,19 +22,16 @@ class ContentPages extends StatefulWidget {
 
 class _ContentPagesState extends State<ContentPages> {
   late int totalPages;
-  late int currentPage;
-  late List<String> pageContent;
+  int currentPage = 1;
+  late  List<String> pageContent;
   final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
-    currentPage = 1;
-    pageContent = _splitContentIntoPages();
-    totalPages = pageContent.length;
   }
 
-  List<String> _splitContentIntoPages() {
+  List<String> _splitContentIntoPages(String content) {
     List<String> pages = [];
     int maxCharsPerPage =
         ((widget.width ~/ widget.fontSize) * (widget.height ~/ widget.fontSize)) ~/
@@ -67,7 +65,7 @@ class _ContentPagesState extends State<ContentPages> {
       });
       _pageController.animateToPage(
         currentPage - 1,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
     }
@@ -80,7 +78,7 @@ class _ContentPagesState extends State<ContentPages> {
       });
       _pageController.animateToPage(
         currentPage - 1,
-        duration: Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
     }
@@ -88,17 +86,12 @@ class _ContentPagesState extends State<ContentPages> {
 
   @override
   Widget build(BuildContext context) {
+    pageContent = _splitContentIntoPages(widget.content);
+    totalPages = pageContent.length;
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          '$currentPage/$totalPages',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
         Expanded(
           child: PageView.builder(
             controller: _pageController,
@@ -124,14 +117,20 @@ class _ContentPagesState extends State<ContentPages> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            CupertinoButton(
               onPressed: previousPage,
-              child: Icon(Icons.arrow_back),
+              child: Icon(CupertinoIcons.back),
             ),
-            SizedBox(width: 16.0),
-            ElevatedButton(
+            Text(
+              '$currentPage/$totalPages',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            CupertinoButton(
               onPressed: nextPage,
-              child: Icon(Icons.arrow_forward),
+              child: Icon(CupertinoIcons.forward),
             ),
           ],
         ),

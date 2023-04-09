@@ -61,7 +61,6 @@ class _AudiencePageState extends State<AudiencePage> {
       curContent = "아직 발표내용이 없습니다";
       print("아직 발표내용이 없습니다");
     }
-    setState(() {});
   }
   void listenToPresentationStream(String langCode) async {
     DateTime? previousUpdate;
@@ -94,24 +93,9 @@ class _AudiencePageState extends State<AudiencePage> {
 
   updateCurContentByPresentation(Presentation presentation, String langCode) async{
     String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
-    curContent = translatedText ?? 'error';
-
-    if (curContent != null) {
-      List<String> lines = curContent!.split('\n');
-      int totalPages = (lines.length / linesPerPage).ceil();
-
-      for (int i = 0; i < totalPages; i++) {
-        int startIndex = i * linesPerPage;
-        int endIndex = (i + 1) * linesPerPage;
-        if (endIndex > lines.length) {
-          endIndex = lines.length;
-        }
-        List<String> pageLines = lines.sublist(startIndex, endIndex);
-        String pageText = pageLines.join('\n');
-        pages.add(pageText);
-      }
-    }
+    curContent = translatedText ?? '';
     setState(() {
+
     });
   }
 
