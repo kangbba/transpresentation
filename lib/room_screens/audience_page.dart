@@ -117,32 +117,15 @@ class _AudiencePageState extends State<AudiencePage> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        StreamProvider<Presentation?>(
-          create: (_) => widget.chatRoom!.presentationStream(),
-          initialData: null,
-        ),
-      ],
-      child: Consumer<Presentation?>(
-        builder: (context, snapshot, _) {
-          if (snapshot == null) {
-            return Center(
-              child: Text('발표자가 발표를 준비중입니다. '),
-            );
-          } else {
-            return SingleChildScrollView(
-              child: Container(
-                alignment: Alignment.topLeft,
-                child: Text(
-                  curContent,
-                  style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
-                  maxLines: null,
-                ),
-              ),
-            );
-          }
-        },
+    if(curContent.isEmpty) {
+      return Text('아직 발표가 없습니다');
+    }
+    return Container(
+      alignment: Alignment.topLeft,
+      child: Text(
+        curContent,
+        style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
+        maxLines: null,
       ),
     );
   }
