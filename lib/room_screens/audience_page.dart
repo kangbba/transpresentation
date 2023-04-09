@@ -10,6 +10,7 @@ import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/presentation.dart';
 import '../screens/language_select_screen.dart';
+import 'content_pages.dart';
 
 class AudiencePage extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -20,12 +21,11 @@ class AudiencePage extends StatefulWidget {
 }
 
 class _AudiencePageState extends State<AudiencePage> {
+
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
-
   StreamSubscription<Presentation?>? _presentationSubscription;
   StreamSubscription<LanguageItem>? _languageSubscription;
-
   String curContent = '';
 
   @override
@@ -117,16 +117,15 @@ class _AudiencePageState extends State<AudiencePage> {
 
   @override
   Widget build(BuildContext context) {
-    if(curContent.isEmpty) {
+    if (curContent.isEmpty) {
       return Text('아직 발표가 없습니다');
     }
-    return Container(
-      alignment: Alignment.topLeft,
-      child: Text(
-        curContent,
-        style: TextStyle(fontSize: 20, color: Colors.black87, height: 1.5),
-        maxLines: null,
-      ),
+
+    return ContentPages(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height / 1.2,
+      fontSize: 20,
+      content: curContent,
     );
   }
 
