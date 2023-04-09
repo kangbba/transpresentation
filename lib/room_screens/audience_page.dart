@@ -27,6 +27,7 @@ class _AudiencePageState extends State<AudiencePage> {
   StreamSubscription<Presentation?>? _presentationSubscription;
   StreamSubscription<LanguageItem>? _languageSubscription;
   String curContent = '';
+  late String curLangCode;
 
   @override
   void initState() {
@@ -34,11 +35,13 @@ class _AudiencePageState extends State<AudiencePage> {
     translateByGoogleServer.initializeTranslateByGoogleServer();
     LanguageItem curLanguageItem = _languageSelectControl.myLanguageItem;
     //회의내용 감지를 시작한다.
-    listenToPresentationStream(_languageSelectControl.myLanguageItem.langCodeGoogleServer!);
+    curLangCode = _languageSelectControl.myLanguageItem.langCodeGoogleServer!;
+    listenToPresentationStream(curLangCode);
     //언어를 바꿔서 설정할때 재호출한다.
     _languageSubscription = _languageSelectControl.languageItemStream.listen((currentLanguageItem) {
       print("currentLanguageItem 변경이 감지됨");
-      listenToPresentationStream(currentLanguageItem.langCodeGoogleServer!);
+      curLangCode = currentLanguageItem.langCodeGoogleServer!;
+      listenToPresentationStream(curLangCode);
     });
   }
   @override
@@ -86,11 +89,6 @@ class _AudiencePageState extends State<AudiencePage> {
       print('presentationStream 에러 발생: $error');
     });
   }
-
-  int linesPerPage = 10;
-  List<String> pages = [];
-  int currentPage = 0;
-
   updateCurContentByPresentation(Presentation presentation, String langCode) async{
     String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
     curContent = translatedText ?? '';
@@ -106,10 +104,11 @@ class _AudiencePageState extends State<AudiencePage> {
     }
 
     return ContentPages(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height / 1.2,
-      fontSize: 20,
-      content: curContent,
+        width: MediaQuery.of(context).size.width - 30,
+        height:  MediaQuery.of(context).size.height / 2.5,
+        fontSize: 20,
+        content: curContent,
+        langCode : curLangCode,
     );
   }
 

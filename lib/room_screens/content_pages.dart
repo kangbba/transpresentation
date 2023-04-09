@@ -8,34 +8,66 @@ class ContentPages extends StatefulWidget {
   final double height;
   final double fontSize;
   final String content;
+  final String langCode;
 
-  ContentPages({
+  const ContentPages({super.key,
     required this.width,
     required this.height,
     required this.fontSize,
     required this.content,
+    required this.langCode,
   });
 
   @override
   _ContentPagesState createState() => _ContentPagesState();
+
 }
 
 class _ContentPagesState extends State<ContentPages> {
-  late int totalPages;
+  int totalPages = 1;
   int currentPage = 1;
-  late  List<String> pageContent;
+  List<String>? pageContent;
   final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
   }
+  @override
+  void didUpdateWidget(ContentPages oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if(widget.langCode != oldWidget.langCode){
+      updatePageInfo(false);
+    }
+    else if(widget.content != oldWidget.content){
+      updatePageInfo(true);
+    }
+  }
+
+  updatePageInfo(bool useLastPage){
+    pageContent = _splitContentIntoPages(widget.content);
+    int previousPageCount = totalPages;
+    int newPageCount = pageContent!.length;
+    totalPages = newPageCount;
+    if(useLastPage){
+      if(newPageCount > previousPageCount){
+        toLastPage();
+      }
+    }
+    else{
+      toFirstPage();
+    }
+  }
+  static const double lineSpacing = 1.3;
 
   List<String> _splitContentIntoPages(String content) {
     List<String> pages = [];
-    int maxCharsPerPage =
-        ((widget.width ~/ widget.fontSize) * (widget.height ~/ widget.fontSize)) ~/
-            2; // assuming average length of a Korean character is 2
+    double lineHeight = widget.fontSize * lineSpacing;
+    int maxCharsPerLine = (widget.width ~/ widget.fontSize).toInt();
+    int maxLinesPerPage = (widget.height ~/ lineHeight).toInt();
+    int maxCharsPerPage = maxCharsPerLine * maxLinesPerPage;
+
     String remainingContent = widget.content;
 
     while (remainingContent.isNotEmpty) {
@@ -57,14 +89,11 @@ class _ContentPagesState extends State<ContentPages> {
 
     return pages;
   }
-
   void nextPage() {
-    if (currentPage < totalPages) {
-      setState(() {
-        currentPage++;
-      });
+    int targetPage = currentPage + 1;
+    if (targetPage <= totalPages) {
       _pageController.animateToPage(
-        currentPage - 1,
+        targetPage - 1,
         duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
@@ -72,69 +101,99 @@ class _ContentPagesState extends State<ContentPages> {
   }
 
   void previousPage() {
-    if (currentPage > 1) {
-      setState(() {
-        currentPage--;
-      });
+    int targetPage = currentPage - 1;
+    if (targetPage >= 1) {
       _pageController.animateToPage(
-        currentPage - 1,
+        targetPage - 1,
         duration: const Duration(milliseconds: 500),
         curve: Curves.ease,
       );
+      currentPage = targetPage;
     }
   }
 
+  void toLastPage() {
+    int targetPage = totalPages;
+    if (targetPage >= 1) {
+      _pageController.animateToPage(
+        targetPage - 1,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.ease,
+      );
+      currentPage = targetPage;
+    }
+  }
+
+  void toFirstPage() {
+    int targetPage = 1;
+    if (targetPage <= totalPages) {
+      _pageController.animateToPage(
+        targetPage - 1,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.ease,
+      );
+      currentPage = targetPage;
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    pageContent = _splitContentIntoPages(widget.content);
-    totalPages = pageContent.length;
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Expanded(
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: totalPages,
-            itemBuilder: (context, index) {
-              return Container(
-                width: widget.width,
-                height: widget.height,
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  pageContent[index],
-                  style: TextStyle(fontSize: widget.fontSize),
-                ),
-              );
-            },
-            onPageChanged: (index) {
-              setState(() {
-                currentPage = index + 1;
-              });
-            },
+    if(pageContent == null){
+      return Container();
+    }
+    return Container(
+      color: Colors.grey[100],
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: totalPages,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal : 16.0),
+                  child: Container(
+                    width: widget.width,
+                    height: widget.height,
+                    child: Text(
+                      pageContent![index],
+                      style: TextStyle(fontSize: widget.fontSize, color: Colors.black87, height: lineSpacing),
+                    ),
+                  ),
+                );
+              },
+              onPageChanged: (index) {
+                setState(() {
+                  currentPage = index + 1;
+                });
+              },
+            ),
           ),
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CupertinoButton(
-              onPressed: previousPage,
-              child: Icon(CupertinoIcons.back),
-            ),
-            Text(
-              '$currentPage/$totalPages',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CupertinoButton(
+                onPressed: previousPage,
+                child: Icon(CupertinoIcons.back),
               ),
-            ),
-            CupertinoButton(
-              onPressed: nextPage,
-              child: Icon(CupertinoIcons.forward),
-            ),
-          ],
-        ),
-      ],
+              Text(
+                '$currentPage/$totalPages',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              CupertinoButton(
+                onPressed: nextPage,
+                child: Icon(CupertinoIcons.forward),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
