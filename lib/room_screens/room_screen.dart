@@ -142,13 +142,10 @@ class _RoomScreenState extends State<RoomScreen> {
                     ),
 
                     Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Container(
-                          child :isCurUserHost
-                            ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
-                            : AudiencePage(chatRoom: chatRoom!)!,
-                        ),
+                      child: Container(
+                        child :isCurUserHost
+                          ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
+                          : AudiencePage(chatRoom: chatRoom!)!,
                       )
                     ),
 

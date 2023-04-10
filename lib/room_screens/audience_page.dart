@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'dart:ffi';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/helper/sayne_separator.dart';
 
 import '../apis/translate_by_googleserver.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/presentation.dart';
 import '../screens/language_select_screen.dart';
+import 'auto_scrollable_text.dart';
 import 'content_pages.dart';
 
 class AudiencePage extends StatefulWidget {
@@ -79,7 +82,7 @@ class _AudiencePageState extends State<AudiencePage> {
         DateTime currentUpdate = DateTime.now();
         int diff = previousUpdate != null ? currentUpdate.difference(previousUpdate!).inMilliseconds : 0;
         print("presentation 내용 변경이 감지, 시간차이: ${diff}ms");
-        if(diff > 100){
+        if(diff > 10){
           updateCurContentByPresentation(presentation, langCode);
         }
         previousUpdate = currentUpdate;
@@ -91,8 +94,11 @@ class _AudiencePageState extends State<AudiencePage> {
   }
   updateCurContentByPresentation(Presentation presentation, String langCode) async{
     String? translatedText = await translateByGoogleServer.textTranslate(presentation.content, langCode);
-    curContent = translatedText ?? '';
-
+    if(translatedText == null){
+      print("응답에 오류가있으므로 아무것도 하지 않겠음");
+      return;
+    }
+    curContent = translatedText;
     if(mounted){
       setState(() {
 
@@ -103,16 +109,12 @@ class _AudiencePageState extends State<AudiencePage> {
   @override
   Widget build(BuildContext context) {
     if (curContent.isEmpty) {
-      return Text('아직 발표가 없습니다');
+      return const Center(child: Text('발표 내용이 없습니다'));
     }
-
-    return ContentPages(
-        width: MediaQuery.of(context).size.width - 30,
-        height:  MediaQuery.of(context).size.height / 2.5,
-        fontSize: 20,
-        content: curContent,
-        langCode : curLangCode,
-    );
+    final screenHeight = MediaQuery.of(context).size.height;
+    final fontSize = screenHeight * 0.03; // 디바이스 높이의 3%에 해당하는 폰트 크기
+    final height = screenHeight / 2; // 디바이스 높이의 1/3에 해당하는 height
+    return AutoScrollableText(content: curContent, textStyle: TextStyle(fontSize: fontSize), bottomPadding: height / 3,);
   }
 
 }
