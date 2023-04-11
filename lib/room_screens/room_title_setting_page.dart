@@ -22,7 +22,7 @@ class _RoomTitleSettingPageState extends State<RoomTitleSettingPage> {
   @override
   void initState() {
     super.initState();
-    _textController.text = "${AuthProvider.instance.curUser!.displayName!}님의 회의공간 ${Random().nextInt(1000)} (${DateTime.now().month}월${DateTime.now().day}일 ${DateTime.now().hour}:${DateTime.now().minute})";
+    _textController.text = "회의공간 ${Random().nextInt(10000)}";
   }
 
   @override
@@ -99,20 +99,22 @@ class _RoomTitleSettingPageState extends State<RoomTitleSettingPage> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text(
-                  "회의실 제목 설정",
+                  "회의실의 이름을 정해주세요",
                   style: TextStyle(fontSize: 16),
                   textAlign: TextAlign.left,
                 ),
               ),
             ),
             Expanded(child: Align(alignment : Alignment.center, child: _buildTitleField())),
-            SizedBox(
-              height: 60,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: ElevatedButton(
-                  onPressed: _onCreatePressed,
-                  child: Icon(Icons.navigate_next),
+            Align(
+              alignment: Alignment.centerRight,
+              child: SizedBox(
+                height: 60,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InkWell(
+                      onTap: _onCreatePressed,
+                      child: Icon(Icons.check_circle, color: Colors.green[400], size: 35,)),
                 ),
               ),
             ),

@@ -24,32 +24,34 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
   }
   @override
   Widget build(BuildContext context) {
+    if(_authProvider.curUser == null){
+      return Container(child: Text("로그인 필요"));
+    }
     return MultiProvider(
       providers: [
-        StreamProvider<List<dynamic>>(
-          create: (_) => widget.chatRoom.membersStream,
+        StreamProvider<List<UserModel>>(
+          create: (_) => widget.chatRoom.userModelsStream,
           initialData: [],
         ),
       ],
-      child: Consumer<List<dynamic>>(
-        builder: (_, membersSnapshot, __) {
+      child: Consumer<List<UserModel>>(
+        builder: (_, userModelSnapshot, __) {
 // 예외 처리
-          if (membersSnapshot.isEmpty) {
+          if (userModelSnapshot.isEmpty) {
             return const Center(
               child: CircularProgressIndicator(),
             );
           }
-          final members = membersSnapshot;
+          List<UserModel> userModels = userModelSnapshot;
           final curUserModel = UserModel.fromFirebaseUser( _authProvider.curUser!);
           final curUserUid = curUserModel.uid;
           final hostUserUid = widget.chatRoom.host.uid;
           return ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: members.length,
+            itemCount: userModels.length,
             itemBuilder: (context, index) {
-              final member = members[index];
-              final UserModel userModel = UserModel.fromMap(member);
+              final UserModel userModel = userModels[index];
               return _memberListTile(context, userModel, curUserUid, hostUserUid);
             },
           );

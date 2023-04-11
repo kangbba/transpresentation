@@ -65,12 +65,15 @@ class _RoomScreenState extends State<RoomScreen> {
   @override
   Widget build(BuildContext context) {
     if (chatRoom == null) {
-      return loading();
+      return loading("chat room 불러오는중");
+    }
+    if( _authProvider.curUserModel == null){
+      return loading("로그인 필요");
     }
     return MultiProvider(
       providers: [
-        StreamProvider<List<dynamic>>(
-          create: (_) => chatRoom!.membersStream,
+        StreamProvider<List<UserModel>>(
+          create: (_) => chatRoom!.userModelsStream,
           initialData: [],
         ),
         StreamProvider<UserModel>(
@@ -81,9 +84,9 @@ class _RoomScreenState extends State<RoomScreen> {
           create: (_) => _languageSelectControl,
         ),
       ],
-      child: Consumer2<List<dynamic>, UserModel>(
-        builder: (_, membersSnapshot, hostUserModel, __) {
-          if (membersSnapshot.isEmpty) {
+      child: Consumer2<List<UserModel>, UserModel>(
+        builder: (_, userModelsSnapshot, hostUserModel, __) {
+          if (userModelsSnapshot.isEmpty) {
             return Scaffold(
               appBar: AppBar(
                 backgroundColor: ColorManager.color_standard,
@@ -94,8 +97,7 @@ class _RoomScreenState extends State<RoomScreen> {
               ),
             );
           }
-
-          UserModel curUserModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
+          UserModel curUserModel = _authProvider.curUserModel!;
           final isCurUserHost = hostUserModel.uid == curUserModel.uid;
 
           return WillPopScope(
@@ -215,7 +217,7 @@ class _RoomScreenState extends State<RoomScreen> {
     Navigator.pop(context);
 
   }
-  Scaffold loading() {
+  Scaffold loading(String str) {
     return Scaffold(
       appBar: AppBar(
         title: Text(''),
@@ -223,21 +225,15 @@ class _RoomScreenState extends State<RoomScreen> {
       ),
 
       body: Center(
-        child: Text(''),
+        child: Text(str),
       ),
     );
   }
 
 
   Widget _memberListTile(BuildContext context, UserModel userModel, String curUserUid, String hostUserUid) {
-    final uid = userModel.uid;
-    final displayName = userModel.displayName;
-
     final isCurUser = userModel.uid == curUserUid;
-    final isCurUserHost = curUserUid == hostUserUid;
-    final isHost = userModel.uid == hostUserUid;
     final email = userModel.email;
-    final photoURL = userModel.photoURL;
     return ListTile(
       leading: ProfileCircle(userModel: userModel, radius: 20,),
       title: Text('<발표자> ${userModel.displayName}', style: TextStyle(color: Colors.black, fontSize: 17),),
@@ -246,15 +242,17 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
   _onPressedExitRoom(BuildContext context) async{
+    if(_authProvider.curUserModel == null){
+      sayneToast("curUserModel null");
+      return;
+    }
     bool? confirmation = await sayneAskDialog(context, "", "이 채팅방에서 나가시겠습니까?");
-    UserModel user = UserModel.fromFirebaseUser(_authProvider.curUser!);
-    final result = await chatRoom!.exitRoom(user!);
-    final roomId = chatRoom!.id;
-    final roomName = chatRoom!.name;
-    // Show a confirmation dialog to the user
+    UserModel user = _authProvider.curUserModel!;
     if(confirmation == true){
       await chatRoom!.exitRoom(user);
-      onBackPressed(context);
+      if(mounted) {
+        onBackPressed(context);
+      }
     }
   }
 

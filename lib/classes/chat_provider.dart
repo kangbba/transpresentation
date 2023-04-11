@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:transpresentation/classes/statics.dart';
 import 'package:transpresentation/testing/message.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
@@ -22,11 +23,12 @@ class ChatProvider with ChangeNotifier {
 
   Future<ChatRoom?> createChatRoom(String chatRoomName, UserModel hostUserModel) async {
     try {
-      final chatRoomRef = FirebaseFirestore.instance.collection(ChatRoom.kChatRoomsKey).doc();
+      final chatRoomRef = FirebaseFirestore.instance.collection(kChatRoomsKey).doc();
       final newChatRoom = ChatRoom(
         id: chatRoomRef.id,
-        name: chatRoomName == '' ? chatRoomRef.id : chatRoomName,
+        name: chatRoomName,
         host: hostUserModel,
+        createdAt: DateTime.now(),
       );
       await chatRoomRef.set(newChatRoom.toMap());
       final chatRoomSnapshot = await chatRoomRef.get();
@@ -38,6 +40,28 @@ class ChatProvider with ChangeNotifier {
       return null;
     }
   }
+  Stream<List<ChatRoom>> chatRoomsStream() {
+    return FirebaseFirestore.instance
+        .collection(kChatRoomsKey)
+        .snapshots()
+        .map((querySnapshot) {
+      if (querySnapshot.docs.isEmpty) {
+        return [];
+      }
+      List<ChatRoom> chatRooms =
+      querySnapshot.docs.map((doc) => ChatRoom.fromFirebaseSnapshot(doc)).toList();
+      // 'createdAt' 필드가 있는 경우에만 정렬
+      if (querySnapshot.docs.first.data().containsKey(kCreatedAtKey)) {
+        chatRooms.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      }
+      return chatRooms;
+    });
+  }
+
+
+
+
+
 
 
 
