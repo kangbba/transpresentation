@@ -87,7 +87,7 @@ class _PresenterPageState extends State<PresenterPage> {
           delay: const Duration(milliseconds: 200),
           repeat: true,
           minRadius: isRecording ? 35 : 0,
-          ripplesCount: 6,
+          ripplesCount: 8,
           duration: const Duration(milliseconds: 6 * 300),
           child:ElevatedButton(
             style: ButtonStyle(
@@ -126,7 +126,7 @@ class _PresenterPageState extends State<PresenterPage> {
     else{
 
     }
-    speechToTextControl.listen(langCode);
+    speechToTextControl.startListen(langCode);
     int delayMs = 50;
     //첫 마디를 대기한다.
     while(isRecording){
@@ -148,13 +148,15 @@ class _PresenterPageState extends State<PresenterPage> {
       else{
         notRefreshedTotalTime += delayMs;
         print("비갱신 시간 : $notRefreshedTotalTime");
-        if(notRefreshedTotalTime > 2000){
+        if(notRefreshedTotalTime > 3000){
           isRecording = false;
         }
       }
       await Future.delayed(Duration(milliseconds: delayMs));
     }
     speechToTextControl.stopListen();
+    widget.chatRoom.updatePresentation(langCode, "$recentStr.");
+    setState(() {});
   }
 
 // listeningRoutine(String langCode) async {

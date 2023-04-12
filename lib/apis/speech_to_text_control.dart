@@ -48,7 +48,7 @@ class SpeechToTextControl with ChangeNotifier {
     );
     return available;
   }
-  void listen(String localeId) {
+  void startListen(String localeId) {
     isListening = true;
     _speech.listen(
         localeId: localeId,

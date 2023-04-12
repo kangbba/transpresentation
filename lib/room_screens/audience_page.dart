@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/apis/text_to_speech_control.dart';
 import 'package:transpresentation/helper/sayne_separator.dart';
 
 import '../apis/translate_by_googleserver.dart';
@@ -25,6 +26,7 @@ class AudiencePage extends StatefulWidget {
 
 class _AudiencePageState extends State<AudiencePage> {
 
+  TextToSpeechControl _textToSpeechControl = TextToSpeechControl();
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
   StreamSubscription<Presentation?>? _presentationSubscription;
@@ -35,6 +37,7 @@ class _AudiencePageState extends State<AudiencePage> {
   @override
   void initState() {
     super.initState();
+    _textToSpeechControl.initTextToSpeech();
     translateByGoogleServer.initializeTranslateByGoogleServer();
     LanguageItem curLanguageItem = _languageSelectControl.myLanguageItem;
     //회의내용 감지를 시작한다.
@@ -85,6 +88,9 @@ class _AudiencePageState extends State<AudiencePage> {
         if(diff > 10){
           updateCurContentByPresentation(presentation, langCode);
         }
+        //TODO
+        //중복없이 text to speech 호출하기.
+
         previousUpdate = currentUpdate;
       }
     },
