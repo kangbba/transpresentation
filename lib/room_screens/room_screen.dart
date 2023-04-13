@@ -5,6 +5,7 @@ import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
 
+import '../apis/text_to_speech_control.dart';
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';
 import '../classes/chat_room.dart';
@@ -22,6 +23,7 @@ class RoomScreen extends StatefulWidget {
 }
 
 class _RoomScreenState extends State<RoomScreen> {
+  final TextToSpeechControl _textToSpeechControl = TextToSpeechControl();
   final _authProvider = AuthProvider.instance;
   final _chatProvider = ChatProvider.instance;
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
@@ -33,6 +35,7 @@ class _RoomScreenState extends State<RoomScreen> {
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
+    _textToSpeechControl.initTextToSpeech();
     //참가 처리
     final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
     sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
@@ -146,7 +149,7 @@ class _RoomScreenState extends State<RoomScreen> {
                     Expanded(
                       child: Container(
                         child :isCurUserHost
-                          ? PresenterPage(chatRoom: chatRoom!, languageSelectControl: _languageSelectControl,)
+                          ? PresenterPage(chatRoom: chatRoom!)
                           : AudiencePage(chatRoom: chatRoom!)!,
                       )
                     ),
@@ -155,7 +158,7 @@ class _RoomScreenState extends State<RoomScreen> {
                       height: 80,
                       child: Column(
                         children: [
-                          const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 16),
+                          const SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 8),
                           languageSelectScreenBtn(isCurUserHost),
                         ],
                       ),

@@ -9,29 +9,28 @@ import 'package:transpresentation/apis/translate_by_googleserver.dart';
 import 'package:transpresentation/classes/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/auto_scrollable_text.dart';
+import '../apis/text_to_speech_control.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../helper/sayne_separator.dart';
 
 class PresenterPage extends StatefulWidget {
   final ChatRoom chatRoom;
-  final LanguageSelectControl languageSelectControl;
 
-  const PresenterPage({Key? key, required this.chatRoom, required this.languageSelectControl}) : super(key: key);
+  const PresenterPage({Key? key, required this.chatRoom}) : super(key: key);
 
   @override
   _PresenterPageState createState() => _PresenterPageState();
 }
 
 class _PresenterPageState extends State<PresenterPage> {
+  final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
   bool isRecording = false;
-
 
   StreamSubscription? subs;
   final _authProvider = AuthProvider.instance;
   String recentStr = '';
-  String recentTranslatedStr = '';
 
   @override
   void initState() {
@@ -60,24 +59,17 @@ class _PresenterPageState extends State<PresenterPage> {
   }
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider.value(value: widget.languageSelectControl),
+    final screenHeight = MediaQuery.of(context).size.height;
+    final fontSize = screenHeight * 0.032; // 디바이스 높이의 3%에 해당하는 폰트 크기
+    final height = screenHeight / 2; // 디바이스 높이의 1/3에 해당하는 height
+    return Column(
+      children: [
+        Expanded(flex : 1, child: Center(child: Text(recentStr, style : TextStyle(fontSize: fontSize),))),
+        // AutoScrollableText(content: recentStr, textStyle: TextStyle(fontSize: 18), bottomPadding: 100),
+        SizedBox(
+            height: 70,
+            child: Center(child: _audioRecordBtn())),
       ],
-      child: Consumer<LanguageSelectControl>(
-        builder: (context, languageControl, child) {
-          return Column(
-            children: [
-              AutoScrollableText(content: recentStr, textStyle: TextStyle(fontSize: 18), bottomPadding: 100),
-              const SayneSeparator(color: Colors.black45, height: 0.3, top: 8, bottom: 8),
-              AutoScrollableText(content: recentTranslatedStr, textStyle: TextStyle(fontSize: 18), bottomPadding: 100),
-              SizedBox(
-                  height: 80,
-                  child: _audioRecordBtn()),
-            ],
-          );
-        },
-      ),
     );
   }
   Widget _audioRecordBtn() {
@@ -103,10 +95,9 @@ class _PresenterPageState extends State<PresenterPage> {
                 }
                 isRecording = !isRecording;
                 if(isRecording){
-                  listeningRoutine(widget.languageSelectControl.myLanguageItem.speechLocaleId!);
+                  listeningLoopingRoutine();
                 }
                 else{
-
                 }
               });
             },
@@ -114,50 +105,63 @@ class _PresenterPageState extends State<PresenterPage> {
           )
       ) ;
   }
-  listeningRoutine(String langCode) async{
+  listeningLoopingRoutine() async{
     recentStr = '';
-    speechToTextControl.recentSentence = '';
-    widget.chatRoom.updatePresentation(langCode, '');
-
+    int index = 0;
+    while(true){
+      index++;
+      print("$index 회차반복");
+      LanguageItem languageItem = _languageSelectControl.myLanguageItem;
+      await listeningRoutine(speechToTextControl, languageItem);
+      if(!isRecording){
+        break;
+      }
+      await TextToSpeechControl.instance.speak(recentStr);
+      await Future.delayed(const Duration(milliseconds: 2000));
+    }
+  }
+  listeningRoutine(SpeechToTextControl speechToTextControl, LanguageItem languageItem) async{
+    speechToTextControl = SpeechToTextControl();
     bool isInitialized = await speechToTextControl.init();
     if(!isInitialized){
       return;
     }
-    else{
-
-    }
-    speechToTextControl.startListen(langCode);
+    speechToTextControl.recentSentence = '';
+    speechToTextControl.startListen(languageItem.sttLangCode!);
     int delayMs = 50;
     //첫 마디를 대기한다.
+    int notRefreshedTotalTime = 0;
     while(isRecording){
       if(speechToTextControl.recentSentence.isNotEmpty){
         print("첫마디 입력성공");
         break;
       }
       print("첫 마디 대기중");
-      await Future.delayed(Duration(milliseconds: delayMs));
+      await Future.delayed(const Duration(milliseconds: 10));
     }
-    int notRefreshedTotalTime = 0;
+    recentStr = '';
     while(isRecording){
       if(recentStr != speechToTextControl.recentSentence) {
         notRefreshedTotalTime = 0;
         recentStr = speechToTextControl.recentSentence;
-        widget.chatRoom.updatePresentation(langCode, recentStr);
+        widget.chatRoom.updatePresentation(languageItem.sttLangCode!, recentStr);
         setState(() {});
       }
       else{
         notRefreshedTotalTime += delayMs;
         print("비갱신 시간 : $notRefreshedTotalTime");
-        if(notRefreshedTotalTime > 3000){
-          isRecording = false;
+        if(notRefreshedTotalTime > 1000){
+          print("이 문장 break");
+          break;
         }
       }
       await Future.delayed(Duration(milliseconds: delayMs));
     }
-    speechToTextControl.stopListen();
-    widget.chatRoom.updatePresentation(langCode, "$recentStr.");
+    widget.chatRoom.updatePresentation(languageItem.sttLangCode!, '$recentStr;');
     setState(() {});
+    speechToTextControl.stopListen();
   }
+
 
 // listeningRoutine(String langCode) async {
   //

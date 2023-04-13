@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/apis/text_to_speech_control.dart';
 import 'package:transpresentation/helper/sayne_separator.dart';
 
 import '../classes/language_select_control.dart';
@@ -89,6 +90,8 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
     if(!isSelectedLanguage)
     {
       widget.languageSelectControl.myLanguageItem = languageItem;
+      print("tts 코드 변경! ${languageItem.sttLangCode!}");
+      TextToSpeechControl.instance.changeLanguage(languageItem.sttLangCode!);
     }
     Navigator.of(context).pop();
   }
