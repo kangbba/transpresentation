@@ -22,7 +22,7 @@ class _RoomTitleSettingPageState extends State<RoomTitleSettingPage> {
   @override
   void initState() {
     super.initState();
-    _textController.text = "회의공간 ${Random().nextInt(10000)}";
+    _textController.text = "Classroom ${Random().nextInt(10000)}";
   }
 
   @override

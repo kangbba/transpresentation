@@ -16,8 +16,9 @@ import '../helper/sayne_separator.dart';
 
 class PresenterPage extends StatefulWidget {
   final ChatRoom chatRoom;
+  final double presenterSpeakIdleLimit;
 
-  const PresenterPage({Key? key, required this.chatRoom}) : super(key: key);
+  const PresenterPage({Key? key, required this.chatRoom, required this.presenterSpeakIdleLimit}) : super(key: key);
 
   @override
   _PresenterPageState createState() => _PresenterPageState();
@@ -133,6 +134,7 @@ class _PresenterPageState extends State<PresenterPage> {
       await TextToSpeechControl.instance.speak(recentStr);
       await Future.delayed(const Duration(milliseconds: 2000));
     }
+
     tutorialText = "";
   }
   listeningRoutine(SpeechToTextControl speechToTextControl, LanguageItem languageItem) async{
@@ -145,7 +147,7 @@ class _PresenterPageState extends State<PresenterPage> {
     speechToTextControl.startListen(languageItem.sttLangCode!);
     int delayMs = 50;
     //첫 마디를 대기한다.
-    int notRefreshedTotalTime = 0;
+    double presenterSpeakIdleAcumTime = 0;
     while(isRecording){
       if(speechToTextControl.recentSentence.isNotEmpty){
         print("첫마디 입력성공");
@@ -157,15 +159,15 @@ class _PresenterPageState extends State<PresenterPage> {
     recentStr = '';
     while(isRecording){
       if(recentStr != speechToTextControl.recentSentence) {
-        notRefreshedTotalTime = 0;
+        presenterSpeakIdleAcumTime = 0;
         recentStr = speechToTextControl.recentSentence;
         widget.chatRoom.updatePresentation(languageItem.sttLangCode!, recentStr);
         setState(() {});
       }
       else{
-        notRefreshedTotalTime += delayMs;
-        print("비갱신 시간 : $notRefreshedTotalTime");
-        if(notRefreshedTotalTime > 1000){
+        presenterSpeakIdleAcumTime += delayMs;
+        print("비갱신 시간 : $presenterSpeakIdleAcumTime");
+        if(presenterSpeakIdleAcumTime > widget.presenterSpeakIdleLimit){
           print("이 문장 break");
           break;
         }

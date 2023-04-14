@@ -88,7 +88,7 @@ class _RoomDisplayerState extends State<RoomDisplayer> {
       if (useManagementFunction)
         PopupMenuItem(
           value: 'setHost',
-          child: Text('호스트 위임하기'),
+          child: Text('발표자 위임하기'),
         ),
 
       PopupMenuItem<String>(

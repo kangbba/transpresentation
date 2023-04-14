@@ -38,16 +38,16 @@ class _TitleInputScreenState extends State<TitleInputScreen> {
           icon: Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: Align(alignment: Alignment.center, child: Text('회의실 이름 설정')),
+        title: const Align(alignment: Alignment.center, child: Text('회의실 이름 설정')),
         actions: [
           IconButton(
-            icon: Icon(Icons.check),
+            icon: const Icon(Icons.check),
             onPressed: () => Navigator.of(context).pop(_textController.text),
           ),
         ],
       ),
       body: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         width: double.infinity,
         height: double.infinity,
         color: Colors.white,

@@ -71,7 +71,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
         tabTitle = "Friends";
         break;
       case MainScreenTab.chats:
-        tabTitle = "Meeting Rooms";
+        tabTitle = "Classrooms";
         break;
     }
     return WillPopScope(

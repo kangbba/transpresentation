@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transpresentation/helper/colors.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
 import 'package:transpresentation/room_screens/presenter_page.dart';
 import 'package:transpresentation/room_screens/profile_circle.dart';
+import 'package:transpresentation/room_screens/user_speakspeed_slider.dart';
 
 import '../apis/text_to_speech_control.dart';
 import '../classes/auth_provider.dart';
@@ -29,9 +31,12 @@ class _RoomScreenState extends State<RoomScreen> {
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  double _presenterSpeakIdleLimit = 2000;
+
   ChatRoom? chatRoom;
   bool isRoomDisplayerOpen = false;
   Stream<UserModel>? _hostStream;
+
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
@@ -66,9 +71,14 @@ class _RoomScreenState extends State<RoomScreen> {
 
   }
   @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
     if (chatRoom == null) {
-      return loading("chat room 불러오는중");
+      return loading("Loading..");
     }
     if( _authProvider.curUserModel == null){
       return loading("로그인 필요");
@@ -118,19 +128,19 @@ class _RoomScreenState extends State<RoomScreen> {
                 backgroundColor: ColorManager.color_standard,
                 title: Text(chatRoom!.name),
                 leading: IconButton(
-                  icon: Icon(Icons.arrow_back),
+                  icon: const Icon(Icons.arrow_back),
                   onPressed: () => onBackPressed(context),
                 ),
                 actions: [
                   IconButton(
-                    icon: Icon(Icons.menu),
+                    icon: const Icon(Icons.menu),
                     onPressed: () {
                       _scaffoldKey.currentState?.openEndDrawer();
                     },
                   ),
                 ],
               ),
-              endDrawer: roomDrawer(context),
+              endDrawer: roomDrawer(context, isCurUserHost),
               body: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -140,7 +150,7 @@ class _RoomScreenState extends State<RoomScreen> {
                       child: Column(
                         children:
                         [
-                          _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid, ),
+                          _memberListTile(context, hostUserModel, curUserModel.uid, hostUserModel.uid,),
                           const SayneSeparator(color: Colors.black54, height: 0.3, top: 0, bottom: 0),
                         ],
                       ),
@@ -149,7 +159,7 @@ class _RoomScreenState extends State<RoomScreen> {
                     Expanded(
                       child: Container(
                         child :isCurUserHost
-                          ? PresenterPage(chatRoom: chatRoom!)
+                          ? PresenterPage(chatRoom: chatRoom!, presenterSpeakIdleLimit : _presenterSpeakIdleLimit)
                           : AudiencePage(chatRoom: chatRoom!)!,
                       )
                     ),
@@ -168,7 +178,7 @@ class _RoomScreenState extends State<RoomScreen> {
       ),
     );
   }
-  Widget roomDrawer(BuildContext context) {
+  Widget roomDrawer(BuildContext context, bool isHost) {
     return SafeArea(
       child: Drawer(
         child: Column(
@@ -199,10 +209,19 @@ class _RoomScreenState extends State<RoomScreen> {
               ),
             ),
             // 고정된 ListTile
+            isHost ?
+            UserSpeakSpeedSlider(
+              presenterSpeakIdleLimit: _presenterSpeakIdleLimit,
+              onChanged: (double value) {
+                setState(() {
+                  _presenterSpeakIdleLimit = value;
+                });
+              },
+            ) : Container(),
             ListTile(
               tileColor: Colors.black12,
-              leading: Icon(Icons.exit_to_app),
-              title: Text("Exit Room"),
+              leading: const Icon(Icons.exit_to_app),
+              title: const Text("Exit Classroom"),
               onTap: () => _onPressedExitRoom(context),
             ),
           ],
