@@ -31,6 +31,7 @@ class _PresenterPageState extends State<PresenterPage> {
   StreamSubscription? subs;
   final _authProvider = AuthProvider.instance;
   String recentStr = '';
+  String tutorialText = '녹음버튼을 눌러 시작';
 
   @override
   void initState() {
@@ -67,8 +68,15 @@ class _PresenterPageState extends State<PresenterPage> {
         Expanded(flex : 1, child: Center(child: Text(recentStr, style : TextStyle(fontSize: fontSize),))),
         // AutoScrollableText(content: recentStr, textStyle: TextStyle(fontSize: 18), bottomPadding: 100),
         SizedBox(
-            height: 70,
-            child: Center(child: _audioRecordBtn())),
+            height: 90,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _audioRecordBtn(),
+                SizedBox(height : 4),
+                Text(tutorialText, style: TextStyle(fontSize: 15),),
+              ],
+            )),
       ],
     );
   }
@@ -112,13 +120,20 @@ class _PresenterPageState extends State<PresenterPage> {
       index++;
       print("$index 회차반복");
       LanguageItem languageItem = _languageSelectControl.myLanguageItem;
+      setState(() {
+        tutorialText = "지금 말하세요!";
+      });
       await listeningRoutine(speechToTextControl, languageItem);
       if(!isRecording){
         break;
       }
+      setState(() {
+        tutorialText = "음성 재생중";
+      });
       await TextToSpeechControl.instance.speak(recentStr);
       await Future.delayed(const Duration(milliseconds: 2000));
     }
+    tutorialText = "";
   }
   listeningRoutine(SpeechToTextControl speechToTextControl, LanguageItem languageItem) async{
     speechToTextControl = SpeechToTextControl();

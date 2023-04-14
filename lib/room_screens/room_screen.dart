@@ -35,7 +35,7 @@ class _RoomScreenState extends State<RoomScreen> {
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
-    _textToSpeechControl.initTextToSpeech();
+    _textToSpeechControl.initTextToSpeech(_languageSelectControl.myLanguageItem.sttLangCode!);
     //참가 처리
     final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
     sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
@@ -154,14 +154,10 @@ class _RoomScreenState extends State<RoomScreen> {
                       )
                     ),
 
+                    const SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 16),
                     SizedBox(
-                      height: 80,
-                      child: Column(
-                        children: [
-                          const SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 8),
-                          languageSelectScreenBtn(isCurUserHost),
-                        ],
-                      ),
+                      height: 60,
+                      child: languageSelectScreenBtn(isCurUserHost),
                     )
                   ],
                 ),
@@ -294,7 +290,7 @@ class _RoomScreenState extends State<RoomScreen> {
               child: Column(
                 children: [
                   Text("   ${languageSelectControl.myLanguageItem.menuDisplayStr} 으로 ${isHost ? '발표 하는 중' : '보는중'}"),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 8,),
                   Text( "   번역 언어 변경하기   ", textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.black87),
                   ),

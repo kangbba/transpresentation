@@ -9,10 +9,11 @@ class TextToSpeechControl extends ChangeNotifier{
     return _instance!;
   }
   FlutterTts flutterTts = FlutterTts();
-  initTextToSpeech() async
+  initTextToSpeech(String sttLangCode) async
   {
     await flutterTts.setPitch(1.0);
     await flutterTts.setSpeechRate(0.5);
+    await changeLanguage(sttLangCode);
   }
   changeLanguage(String sttLangCode) async
   {

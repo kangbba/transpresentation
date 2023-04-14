@@ -57,24 +57,23 @@ class _AudiencePageState extends State<AudiencePage> {
     }
     super.dispose();
   }
-  updateCurContentByFirstPresentation(LanguageItem languageItem) async{
-    Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
-    if(firstPresentation != null){
-      await updateCurContentByPresentation(firstPresentation, languageItem, false);
-      print("첫 발표내용으로 해석해서 업데이트");
-    }
-    else{
-      curContent = "아직 발표내용이 없습니다";
-      print("아직 발표내용이 없습니다");
-    }
-  }
-  bool mute = true;
+  // updateCurContentByFirstPresentation(LanguageItem languageItem) async{
+  //   Presentation? firstPresentation = await widget.chatRoom!.presentationStream().first;
+  //   if(firstPresentation != null){
+  //     await updateCurContentByPresentation(firstPresentation, languageItem, false);
+  //     print("첫 발표내용으로 해석해서 업데이트");
+  //   }
+  //   else{
+  //     curContent = "아직 발표내용이 없습니다";
+  //     print("아직 발표내용이 없습니다");
+  //   }
+  // }
   void listenToPresentationStream(LanguageItem languageItem) async {
     DateTime? previousUpdate;
     if(_presentationSubscription != null){
       _presentationSubscription!.cancel();
     }
-    await updateCurContentByFirstPresentation(languageItem!);
+    // await updateCurContentByFirstPresentation(languageItem!);
     _presentationSubscription = widget.chatRoom!.presentationStream().listen((presentation) async {
       if (presentation == null) {
         print("아직 presentation이 없습니다");
@@ -96,9 +95,13 @@ class _AudiencePageState extends State<AudiencePage> {
     });
   }
   updateCurContentByPresentation(Presentation presentation, LanguageItem languageItem, bool useSpeak) async{
+    if(presentation.content.isEmpty || presentation.content == ';'){
+      print("최근 번역 언어가 내용이 없으므로 아무것도 하지 않겠음");
+      return;
+    }
     bool isFinalResult = presentation.content.contains(';');
     String strToTranslate = presentation.content.replaceAll(';', '.');
-    String? translatedText = await translateByGoogleServer.textTranslate(strToTranslate, languageItem.langCodeGoogleServer!);;
+    String? translatedText = await translateByGoogleServer.textTranslate(strToTranslate, languageItem.langCodeGoogleServer!);
     if(translatedText == null){
       print("응답에 오류가있으므로 아무것도 하지 않겠음");
       return;
