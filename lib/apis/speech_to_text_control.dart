@@ -13,7 +13,6 @@ class SpeechToTextControl with ChangeNotifier {
     _isListening = value;
     notifyListeners();
   }
-
   // final StreamController<List<String>> _sentencedController = StreamController();
   // Stream<List<String>> get sentencedStream => _sentencedController.stream;
   // List<String> _sentenced = [];

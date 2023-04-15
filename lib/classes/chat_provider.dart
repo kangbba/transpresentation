@@ -52,7 +52,7 @@ class ChatProvider with ChangeNotifier {
       querySnapshot.docs.map((doc) => ChatRoom.fromFirebaseSnapshot(doc)).toList();
       // 'createdAt' 필드가 있는 경우에만 정렬
       if (querySnapshot.docs.first.data().containsKey(kCreatedAtKey)) {
-        chatRooms.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        chatRooms.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       }
       return chatRooms;
     });

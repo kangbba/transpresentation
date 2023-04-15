@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
@@ -28,9 +29,12 @@ enum ListeningRoutineState{
 class _PresenterPageState extends State<PresenterPage> {
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
   TextToSpeechControl textToSpeechControl = TextToSpeechControl();
+
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   final AuthProvider _authProvider = AuthProvider.instance;
+  final assetsAudioPlayer = AssetsAudioPlayer();
 
+  StreamSubscription<LanguageItem>? _languageSubscription;
   ListeningRoutineState listeningRoutineState = ListeningRoutineState.offRecognizing;
   bool recordBtnState = false;
   StreamSubscription? hostStreamSubscription;
@@ -63,12 +67,19 @@ class _PresenterPageState extends State<PresenterPage> {
         print("내가 호스트가 아니게 되었다.");
       }
     });
+    _languageSubscription = _languageSelectControl.languageItemStream.listen((currentLanguageItem) {
+      print("currentLanguageItem 변경이 감지됨");
+      recordBtnState = false;
+    });
   }
   @override
   void dispose() {
     recordBtnState = false;
     speechToTextControl.stopListen();
 
+    if(_languageSubscription != null){
+      _languageSubscription!.cancel();
+    }
     if(hostStreamSubscription!=null){
       hostStreamSubscription!.cancel();
     }
@@ -132,6 +143,7 @@ class _PresenterPageState extends State<PresenterPage> {
   listeningLoopingRoutine() async{
     recentStr = '';
     int index = 0;
+    playOnce('assets/ding.mp3');
     while(true){
       if(!recordBtnState){
         break;
@@ -156,6 +168,7 @@ class _PresenterPageState extends State<PresenterPage> {
         print("tts 에러코드 $e");
       }
     }
+    await Future.delayed(const Duration(milliseconds: 1500));
     setState(() {
       listeningRoutineState = ListeningRoutineState.offRecognizing;
     });
@@ -212,6 +225,15 @@ class _PresenterPageState extends State<PresenterPage> {
       listeningRoutineState = ListeningRoutineState.offRecognizing;
     });
     return true;
+  }
+
+  Future<void> playOnce(String audioPath) async {
+    AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+    await assetsAudioPlayer.open(Audio(audioPath));
+
+    assetsAudioPlayer.playlistFinished.listen((event) {
+      assetsAudioPlayer.stop();
+    });
   }
 
 

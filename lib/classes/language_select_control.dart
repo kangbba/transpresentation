@@ -6,21 +6,27 @@ enum TranslateLanguage{
   korean, swedish, turkish, polish, danish, norwegian, finnish, czech, thai, greek, hungarian, hebrew, romanian, ukrainian , vietnamese,
   icelandic, bulgarian, lithuanian, latvian, slovenian, croatian, estonian, serbian, slovak, georgian, catalan, bengali, persian, marathi, indonesian
 }
+
 class LanguageItem {
   late final TranslateLanguage? translateLanguage;
   late final String? menuDisplayStr;
   late final String? sttLangCode;
   late final String? langCodeGoogleServer;
-  late final String voiceName;
+  final String androidTtsVoice;
+  final String iosTtsVoice;
+
 
   LanguageItem({
     this.translateLanguage,
     this.menuDisplayStr,
     this.sttLangCode,
     this.langCodeGoogleServer,
-    String? voiceName,
-  }) : this.voiceName = voiceName ?? '';
+    String? androidTtsVoice,
+    String? iosTtsVoice,
+  })  : androidTtsVoice = androidTtsVoice ?? '',
+        iosTtsVoice = iosTtsVoice ?? '';
 }
+
 
 class LanguageSelectControl with ChangeNotifier{
 
@@ -60,8 +66,8 @@ class LanguageSelectControl with ChangeNotifier{
   // 미국 {name: en-us-x-iom-local, locale: en-US} {name: en-us-x-tpd-network, locale: en-US} {name: en-us-x-iom-network, locale: en-US} {name: en-us-x-tpd-local, locale: en-US} {name: en-us-x-iol-local, locale: en-US}
 
   List<LanguageItem> languageDataList = [
-    LanguageItem(translateLanguage: TranslateLanguage.english, menuDisplayStr: "English", sttLangCode: "en_US", langCodeGoogleServer: "en", voiceName: "en-us-x-iom-local"),
-    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", sttLangCode: "ko_KR", langCodeGoogleServer: "ko", voiceName: "ko-kr-x-kod-network"),
+    LanguageItem(translateLanguage: TranslateLanguage.english, menuDisplayStr: "English", sttLangCode: "en_US", langCodeGoogleServer: "en", androidTtsVoice: 'en-us-x-iom-local'),
+    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", sttLangCode: "ko_KR", langCodeGoogleServer: "ko", androidTtsVoice: 'ko-kr-x-kod-network'),
     LanguageItem(translateLanguage: TranslateLanguage.spanish, menuDisplayStr: "Spanish", sttLangCode: "es_ES", langCodeGoogleServer: "es", ),
     LanguageItem(translateLanguage: TranslateLanguage.french, menuDisplayStr: "French", sttLangCode: "fr_FR", langCodeGoogleServer: "fr",  ),
     LanguageItem(translateLanguage: TranslateLanguage.german, menuDisplayStr: "German", sttLangCode: "de_DE", langCodeGoogleServer: "de", ),
