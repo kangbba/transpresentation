@@ -11,14 +11,17 @@ class LanguageItem {
   late final String? menuDisplayStr;
   late final String? sttLangCode;
   late final String? langCodeGoogleServer;
+  late final String voiceName;
 
   LanguageItem({
     this.translateLanguage,
     this.menuDisplayStr,
     this.sttLangCode,
     this.langCodeGoogleServer,
-  });
+    String? voiceName,
+  }) : this.voiceName = voiceName ?? '';
 }
+
 class LanguageSelectControl with ChangeNotifier{
 
   Stream<LanguageItem> get languageItemStream => _languageItemController.stream;
@@ -52,9 +55,13 @@ class LanguageSelectControl with ChangeNotifier{
     return languageDataList.firstWhere((item) => item.menuDisplayStr == menuDisplayStr, orElse: () => LanguageItem());
   }
 
+  // 남자 목소리 정보
+  // 한국 {name: ko-kr-x-koc-network, locale: ko-KR} /{name: ko-kr-x-koc-local, locale: ko-KR} {name: ko-kr-x-kod-network, locale: ko-KR} {name: ko-kr-x-kod-local, locale: ko-KR}
+  // 미국 {name: en-us-x-iom-local, locale: en-US} {name: en-us-x-tpd-network, locale: en-US} {name: en-us-x-iom-network, locale: en-US} {name: en-us-x-tpd-local, locale: en-US} {name: en-us-x-iol-local, locale: en-US}
+
   List<LanguageItem> languageDataList = [
-    LanguageItem(translateLanguage: TranslateLanguage.english, menuDisplayStr: "English", sttLangCode: "en_US", langCodeGoogleServer: "en", ),
-    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", sttLangCode: "ko_KR", langCodeGoogleServer: "ko", ),
+    LanguageItem(translateLanguage: TranslateLanguage.english, menuDisplayStr: "English", sttLangCode: "en_US", langCodeGoogleServer: "en", voiceName: "en-us-x-iom-local"),
+    LanguageItem(translateLanguage: TranslateLanguage.korean, menuDisplayStr: "Korean", sttLangCode: "ko_KR", langCodeGoogleServer: "ko", voiceName: "ko-kr-x-kod-network"),
     LanguageItem(translateLanguage: TranslateLanguage.spanish, menuDisplayStr: "Spanish", sttLangCode: "es_ES", langCodeGoogleServer: "es", ),
     LanguageItem(translateLanguage: TranslateLanguage.french, menuDisplayStr: "French", sttLangCode: "fr_FR", langCodeGoogleServer: "fr",  ),
     LanguageItem(translateLanguage: TranslateLanguage.german, menuDisplayStr: "German", sttLangCode: "de_DE", langCodeGoogleServer: "de", ),

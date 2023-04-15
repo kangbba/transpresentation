@@ -27,6 +27,7 @@ class AudiencePage extends StatefulWidget {
 class _AudiencePageState extends State<AudiencePage> {
 
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
+  final TextToSpeechControl textToSpeechControl = TextToSpeechControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
   StreamSubscription<Presentation?>? _presentationSubscription;
   StreamSubscription<LanguageItem>? _languageSubscription;
@@ -37,7 +38,6 @@ class _AudiencePageState extends State<AudiencePage> {
   void initState() {
     super.initState();
     translateByGoogleServer.initializeTranslateByGoogleServer();
-    LanguageItem curLanguageItem = _languageSelectControl.myLanguageItem;
     //회의내용 감지를 시작한다.
     listenToPresentationStream(_languageSelectControl.myLanguageItem);
     //언어를 바꿔서 설정할때 재호출한다.
@@ -114,7 +114,7 @@ class _AudiencePageState extends State<AudiencePage> {
     }
     if(isFinalResult && useSpeak){
       print("isFinalResult");
-      await TextToSpeechControl.instance.speak(translatedText);
+      await textToSpeechControl.speak(translatedText, false);
     }
     else{
       print("not isFinalResult");
@@ -129,10 +129,7 @@ class _AudiencePageState extends State<AudiencePage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final fontSize = screenHeight * 0.032; // 디바이스 높이의 3%에 해당하는 폰트 크기
     final height = screenHeight / 2; // 디바이스 높이의 1/3에 해당하는 height
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 40.0),
-      child: Center(child: Text(curContent, style: TextStyle(fontSize: fontSize),)),
-    );
+    return Center(child: Text(curContent, style: TextStyle(fontSize: fontSize),));
     return AutoScrollableText(content: curContent, textStyle: TextStyle(fontSize: fontSize), bottomPadding: height / 3,);
   }
 

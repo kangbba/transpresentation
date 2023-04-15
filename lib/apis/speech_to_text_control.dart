@@ -24,13 +24,10 @@ class SpeechToTextControl with ChangeNotifier {
   //   notifyListeners();
   // }
 
-  final StreamController<String> _recentSentenceController = StreamController();
-  Stream<String> get recentSentenceStream => _recentSentenceController.stream;
   String _recentSentence = '';
   String get recentSentence => _recentSentence;
   set recentSentence(String value) {
     _recentSentence = value;
-    _recentSentenceController.add(value);
     notifyListeners();
   }
   Future<bool> init() async{
@@ -70,6 +67,5 @@ class SpeechToTextControl with ChangeNotifier {
   stopListen(){
     isListening = false;
     _speech.stop();
-    _recentSentenceController.close();
   }
 }

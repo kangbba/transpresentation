@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:transpresentation/helper/colors.dart';
 import 'package:transpresentation/screens/room_selecting_page.dart';
-import 'package:transpresentation/screens/tmp_page.dart';
+import 'package:transpresentation/testing/tmp_page.dart';
 
 import '../classes/auth_provider.dart';
 import '../classes/chat_provider.dart';

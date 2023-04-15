@@ -2,17 +2,13 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:provider/provider.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:transpresentation/apis/speech_to_text_control.dart';
-import 'package:transpresentation/apis/translate_by_googleserver.dart';
 import 'package:transpresentation/classes/auth_provider.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
-import 'package:transpresentation/room_screens/auto_scrollable_text.dart';
 import '../apis/text_to_speech_control.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
-import '../helper/sayne_separator.dart';
 
 class PresenterPage extends StatefulWidget {
   final ChatRoom chatRoom;
@@ -23,16 +19,35 @@ class PresenterPage extends StatefulWidget {
   @override
   _PresenterPageState createState() => _PresenterPageState();
 }
-
+enum ListeningRoutineState{
+  offRecognizing,
+  waitingForFirstSentence,
+  onRecognizing,
+  speakingVoice,
+}
 class _PresenterPageState extends State<PresenterPage> {
-  final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
-  bool isRecording = false;
+  TextToSpeechControl textToSpeechControl = TextToSpeechControl();
+  final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
+  final AuthProvider _authProvider = AuthProvider.instance;
 
-  StreamSubscription? subs;
-  final _authProvider = AuthProvider.instance;
+  ListeningRoutineState listeningRoutineState = ListeningRoutineState.offRecognizing;
+  bool recordBtnState = false;
+  StreamSubscription? hostStreamSubscription;
+
   String recentStr = '';
-  String tutorialText = '녹음버튼을 눌러 시작';
+  String get tutorialText{
+    switch(listeningRoutineState){
+      case ListeningRoutineState.offRecognizing:
+        return "마이크 버튼을 눌러 음성인식을 시작하세요";
+      case ListeningRoutineState.waitingForFirstSentence:
+        return "지금 말하세요!";
+      case ListeningRoutineState.onRecognizing:
+        return "인식중입니다";
+      case ListeningRoutineState.speakingVoice:
+        return "목소리를 재생중입니다.";
+    }
+  }
 
   @override
   void initState() {
@@ -40,7 +55,7 @@ class _PresenterPageState extends State<PresenterPage> {
     super.initState();
     // initAudioStreamType();
     speechToTextControl.init();
-    subs = widget.chatRoom.hostStream().listen((host) {
+    hostStreamSubscription = widget.chatRoom.hostStream().listen((host) {
       if(_authProvider.curUser == null){
         print("curUser가 null이 되었다");
       }
@@ -51,11 +66,11 @@ class _PresenterPageState extends State<PresenterPage> {
   }
   @override
   void dispose() {
-    isRecording = false;
+    recordBtnState = false;
     speechToTextControl.stopListen();
 
-    if(subs!=null){
-      subs!.cancel();
+    if(hostStreamSubscription!=null){
+      hostStreamSubscription!.cancel();
     }
     super.dispose();
   }
@@ -87,7 +102,7 @@ class _PresenterPageState extends State<PresenterPage> {
           color: Colors.blue,
           delay: const Duration(milliseconds: 200),
           repeat: true,
-          minRadius: isRecording ? 35 : 0,
+          minRadius: recordBtnState ? 35 : 0,
           ripplesCount: 8,
           duration: const Duration(milliseconds: 6 * 300),
           child:ElevatedButton(
@@ -102,15 +117,15 @@ class _PresenterPageState extends State<PresenterPage> {
                   sayneToast("해당 기기는 발표자를 지원하지 않습니다");
                   return;
                 }
-                isRecording = !isRecording;
-                if(isRecording){
+                recordBtnState = !recordBtnState;
+                if(recordBtnState){
                   listeningLoopingRoutine();
                 }
                 else{
                 }
               });
             },
-            child: isRecording ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
+            child: recordBtnState ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
           )
       ) ;
   }
@@ -118,37 +133,51 @@ class _PresenterPageState extends State<PresenterPage> {
     recentStr = '';
     int index = 0;
     while(true){
-      index++;
-      print("$index 회차반복");
-      LanguageItem languageItem = _languageSelectControl.myLanguageItem;
-      setState(() {
-        tutorialText = "지금 말하세요!";
-      });
-      await listeningRoutine(speechToTextControl, languageItem);
-      if(!isRecording){
+      if(!recordBtnState){
         break;
       }
       setState(() {
-        tutorialText = "음성 재생중";
+        listeningRoutineState = ListeningRoutineState.offRecognizing;
       });
-      await TextToSpeechControl.instance.speak(recentStr);
-      await Future.delayed(const Duration(milliseconds: 2000));
+      index++;
+      print("$index 회차반복");
+      LanguageItem languageItem = _languageSelectControl.myLanguageItem;
+      bool success = await listeningRoutine(languageItem);
+      if(!success || !recordBtnState){
+        break;
+      }
+      await Future.delayed(const Duration(milliseconds: 1000));
+      setState(() {
+        listeningRoutineState = ListeningRoutineState.speakingVoice;
+      });
+      try{
+        await textToSpeechControl.speak(recentStr, true);
+      }catch(e){
+        print("tts 에러코드 $e");
+      }
     }
-
-    tutorialText = "";
+    setState(() {
+      listeningRoutineState = ListeningRoutineState.offRecognizing;
+    });
   }
-  listeningRoutine(SpeechToTextControl speechToTextControl, LanguageItem languageItem) async{
+
+  //마이크 누른상태로 host화면 벗어날때 dispose호출되어야하는데 그거 확인해야한다.
+
+  Future<bool> listeningRoutine(LanguageItem languageItem) async{
     speechToTextControl = SpeechToTextControl();
     bool isInitialized = await speechToTextControl.init();
     if(!isInitialized){
-      return;
+      return false;
     }
     speechToTextControl.recentSentence = '';
     speechToTextControl.startListen(languageItem.sttLangCode!);
-    int delayMs = 50;
+    int delayMs = 100;
     //첫 마디를 대기한다.
     double presenterSpeakIdleAcumTime = 0;
-    while(isRecording){
+    setState(() {
+      listeningRoutineState = ListeningRoutineState.waitingForFirstSentence;
+    });
+    while(recordBtnState){
       if(speechToTextControl.recentSentence.isNotEmpty){
         print("첫마디 입력성공");
         break;
@@ -156,8 +185,11 @@ class _PresenterPageState extends State<PresenterPage> {
       print("첫 마디 대기중");
       await Future.delayed(const Duration(milliseconds: 10));
     }
+    setState(() {
+      listeningRoutineState = ListeningRoutineState.onRecognizing;
+    });
     recentStr = '';
-    while(isRecording){
+    while(recordBtnState){
       if(recentStr != speechToTextControl.recentSentence) {
         presenterSpeakIdleAcumTime = 0;
         recentStr = speechToTextControl.recentSentence;
@@ -175,8 +207,11 @@ class _PresenterPageState extends State<PresenterPage> {
       await Future.delayed(Duration(milliseconds: delayMs));
     }
     widget.chatRoom.updatePresentation(languageItem.sttLangCode!, '$recentStr;');
-    setState(() {});
-    speechToTextControl.stopListen();
+    await speechToTextControl.stopListen();
+    setState(() {
+      listeningRoutineState = ListeningRoutineState.offRecognizing;
+    });
+    return true;
   }
 
 

@@ -16,6 +16,7 @@ class TranslateByGoogleServer {
     } on Exception catch (e) {
       print('Translation error: $e');
       return null;
+
     }
   }
 }

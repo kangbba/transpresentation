@@ -87,11 +87,11 @@ class _LanguageSelectScreenState extends State<LanguageSelectScreen> {
     );
   }
   void onSelectedLanguageListTile(LanguageItem languageItem, bool isSelectedLanguage) {
+    print("onSelectedLanguageListTile! ${languageItem.sttLangCode!}");
     if(!isSelectedLanguage)
     {
       widget.languageSelectControl.myLanguageItem = languageItem;
-      print("tts 코드 변경! ${languageItem.sttLangCode!}");
-      TextToSpeechControl.instance.changeLanguage(languageItem.sttLangCode!);
+      TextToSpeechControl.instance.changeLanguage(languageItem);
     }
     Navigator.of(context).pop();
   }

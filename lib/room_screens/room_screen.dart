@@ -40,7 +40,7 @@ class _RoomScreenState extends State<RoomScreen> {
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
-    _textToSpeechControl.initTextToSpeech(_languageSelectControl.myLanguageItem.sttLangCode!);
+    _textToSpeechControl.initTextToSpeech(_languageSelectControl.myLanguageItem);
     //참가 처리
     final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
     sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
