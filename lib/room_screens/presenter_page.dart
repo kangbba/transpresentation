@@ -43,7 +43,7 @@ class _PresenterPageState extends State<PresenterPage> {
   String get tutorialText{
     switch(listeningRoutineState){
       case ListeningRoutineState.offRecognizing:
-        return "마이크 버튼을 눌러 음성인식을 시작하세요";
+        return "";
       case ListeningRoutineState.waitingForFirstSentence:
         return "지금 말하세요!";
       case ListeningRoutineState.onRecognizing:
@@ -158,7 +158,7 @@ class _PresenterPageState extends State<PresenterPage> {
       if(!success || !recordBtnState){
         break;
       }
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await Future.delayed(const Duration(milliseconds: 500));
       setState(() {
         listeningRoutineState = ListeningRoutineState.speakingVoice;
       });
@@ -167,8 +167,8 @@ class _PresenterPageState extends State<PresenterPage> {
       }catch(e){
         print("tts 에러코드 $e");
       }
+      await Future.delayed(const Duration(milliseconds: 500));
     }
-    await Future.delayed(const Duration(milliseconds: 1500));
     setState(() {
       listeningRoutineState = ListeningRoutineState.offRecognizing;
     });
@@ -221,9 +221,7 @@ class _PresenterPageState extends State<PresenterPage> {
     }
     widget.chatRoom.updatePresentation(languageItem.sttLangCode!, '$recentStr;');
     await speechToTextControl.stopListen();
-    setState(() {
-      listeningRoutineState = ListeningRoutineState.offRecognizing;
-    });
+    listeningRoutineState = ListeningRoutineState.offRecognizing;
     return true;
   }
 
