@@ -167,7 +167,7 @@ class _PresenterPageState extends State<PresenterPage> {
       }catch(e){
         print("tts 에러코드 $e");
       }
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
     }
     setState(() {
       listeningRoutineState = ListeningRoutineState.offRecognizing;
@@ -220,7 +220,11 @@ class _PresenterPageState extends State<PresenterPage> {
       await Future.delayed(Duration(milliseconds: delayMs));
     }
     widget.chatRoom.updatePresentation(languageItem.sttLangCode!, '$recentStr;');
-    await speechToTextControl.stopListen();
+    try{
+      await speechToTextControl.stopListen();
+    }catch(e){
+      print(e);
+    }
     listeningRoutineState = ListeningRoutineState.offRecognizing;
     return true;
   }

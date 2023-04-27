@@ -23,23 +23,33 @@ class TextToSpeechControl extends ChangeNotifier{
     //   platform.invokeMethod('setIosAudioCategory', params);
     // }
     await flutterTts.setSharedInstance(true);
-    await audioSetting(Platform.isIOS);
     changeLanguage(languageItem);
   }
 
   audioSetting(bool isIOS) async{
     if(isIOS){
-      await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
-          [
-            IosTextToSpeechAudioCategoryOptions.allowBluetooth,
-            IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-            IosTextToSpeechAudioCategoryOptions.mixWithOthers
-          ],
-          IosTextToSpeechAudioMode.voicePrompt
-      );
-      await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
-      await flutterTts.setPitch(1.0);
-      await flutterTts.setSpeechRate(0.5);
+      // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
+      try{
+        await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback,
+            [
+            ],
+            IosTextToSpeechAudioMode.defaultMode
+        );
+        // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
+        //     [
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+        //       IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+        //       IosTextToSpeechAudioCategoryOptions.mixWithOthers
+        //     ],
+        //     IosTextToSpeechAudioMode.voicePrompt
+        // );
+        await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
+        await flutterTts.setPitch(1.0);
+        await flutterTts.setSpeechRate(0.5);
+      }
+      catch(e){
+        print("audio setting error : $e");
+      }
     }
     else{
       await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
@@ -131,6 +141,7 @@ class TextToSpeechControl extends ChangeNotifier{
   speak(String str, bool useWaiting) async {
     if(Platform.isIOS){
       await audioSetting(Platform.isIOS);
+      await Future.delayed(const Duration(milliseconds: 1000));
       await flutterTts.speak(str);
       await flutterTts.awaitSpeakCompletion(useWaiting);
     }
