@@ -28,8 +28,6 @@ enum ListeningRoutineState{
 }
 class _PresenterPageState extends State<PresenterPage> {
   SpeechToTextControl speechToTextControl = SpeechToTextControl();
-  TextToSpeechControl textToSpeechControl = TextToSpeechControl();
-
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
   final AuthProvider _authProvider = AuthProvider.instance;
   final assetsAudioPlayer = AssetsAudioPlayer();
@@ -59,6 +57,7 @@ class _PresenterPageState extends State<PresenterPage> {
     super.initState();
     // initAudioStreamType();
     speechToTextControl.init();
+    TextToSpeechControl.instance.initTextToSpeech(_languageSelectControl.myLanguageItem);
     hostStreamSubscription = widget.chatRoom.hostStream().listen((host) {
       if(_authProvider.curUser == null){
         print("curUser가 null이 되었다");
@@ -74,6 +73,7 @@ class _PresenterPageState extends State<PresenterPage> {
   }
   @override
   void dispose() {
+    print("presenter page가 dispose됨");
     recordBtnState = false;
     speechToTextControl.stopListen();
 
@@ -163,7 +163,7 @@ class _PresenterPageState extends State<PresenterPage> {
         listeningRoutineState = ListeningRoutineState.speakingVoice;
       });
       try{
-        await textToSpeechControl.speak(recentStr, true);
+        await TextToSpeechControl.instance.speak(recentStr, true);
       }catch(e){
         print("tts 에러코드 $e");
       }
@@ -229,13 +229,14 @@ class _PresenterPageState extends State<PresenterPage> {
     return true;
   }
 
-  Future<void> playOnce(String audioPath) async {
-    AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
-    await assetsAudioPlayer.open(Audio(audioPath));
 
-    assetsAudioPlayer.playlistFinished.listen((event) {
-      assetsAudioPlayer.stop();
-    });
+  Future<void> playOnce(String audioPath) async {
+    // AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer();
+    // await assetsAudioPlayer.open(Audio(audioPath));
+    //
+    // assetsAudioPlayer.playlistFinished.listen((event) {
+    //   assetsAudioPlayer.stop();
+    // });
   }
 
 

@@ -27,7 +27,6 @@ class AudiencePage extends StatefulWidget {
 class _AudiencePageState extends State<AudiencePage> {
 
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
-  final TextToSpeechControl textToSpeechControl = TextToSpeechControl.instance;
   TranslateByGoogleServer translateByGoogleServer = TranslateByGoogleServer();
   StreamSubscription<Presentation?>? _presentationSubscription;
   StreamSubscription<LanguageItem>? _languageSubscription;
@@ -38,6 +37,7 @@ class _AudiencePageState extends State<AudiencePage> {
   void initState() {
     super.initState();
     translateByGoogleServer.initializeTranslateByGoogleServer();
+    TextToSpeechControl.instance.initTextToSpeech(_languageSelectControl.myLanguageItem);
     //회의내용 감지를 시작한다.
     listenToPresentationStream(_languageSelectControl.myLanguageItem);
     //언어를 바꿔서 설정할때 재호출한다.
@@ -49,6 +49,7 @@ class _AudiencePageState extends State<AudiencePage> {
   }
   @override
   void dispose() {
+    print("audience page가 dispose됨");
     if(_presentationSubscription != null){
       _presentationSubscription!.cancel();
     }
@@ -114,7 +115,7 @@ class _AudiencePageState extends State<AudiencePage> {
     }
     if(isFinalResult && useSpeak){
       print("isFinalResult");
-      await textToSpeechControl.speak(translatedText, false);
+      await TextToSpeechControl.instance.speak(translatedText, false);
     }
     else{
       print("not isFinalResult");

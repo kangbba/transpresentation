@@ -22,39 +22,50 @@ class TextToSpeechControl extends ChangeNotifier{
     //   final Map<String, dynamic> params = <String, dynamic>{'iosAudioCategory': 'AVAudioSessionCategoryPlayback'};
     //   platform.invokeMethod('setIosAudioCategory', params);
     // }
+    audioSpeakMode(false);
+
     await flutterTts.setSharedInstance(true);
     changeLanguage(languageItem);
   }
 
-  audioSetting(bool isIOS) async{
-    if(isIOS){
-      // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
-      try{
-        await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback,
-            [
-            ],
-            IosTextToSpeechAudioMode.defaultMode
-        );
-        // await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
-        //     [
-        //       IosTextToSpeechAudioCategoryOptions.allowBluetooth,
-        //       IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
-        //       IosTextToSpeechAudioCategoryOptions.mixWithOthers
-        //     ],
-        //     IosTextToSpeechAudioMode.voicePrompt
-        // );
-        await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
+  audioSpeakMode(bool b) async{
+    bool isIOS = Platform.isIOS;
+    if(b){
+      print("스피크 모드 시작");
+      if(isIOS){
+        try{
+          await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambient,
+              [
+                IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+                IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+                IosTextToSpeechAudioCategoryOptions.mixWithOthers
+              ],
+              IosTextToSpeechAudioMode.videoChat
+          );
+          // await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
+          await flutterTts.setPitch(1.0);
+          await flutterTts.setSpeechRate(0.5);
+        }
+        catch(e){
+          print("audio setting error : $e");
+        }
+      }
+      else{
+        // await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
         await flutterTts.setPitch(1.0);
         await flutterTts.setSpeechRate(0.5);
       }
-      catch(e){
-        print("audio setting error : $e");
-      }
     }
     else{
-      await flutterTts.setVolume(1.0); // TTS 음성 볼륨을 최대로 설정
-      await flutterTts.setPitch(1.0);
-      await flutterTts.setSpeechRate(0.5);
+      print("스피크 모드 중단");
+      await flutterTts.setIosAudioCategory(IosTextToSpeechAudioCategory.ambientSolo,
+          [
+            IosTextToSpeechAudioCategoryOptions.allowBluetooth,
+            IosTextToSpeechAudioCategoryOptions.allowBluetoothA2DP,
+            IosTextToSpeechAudioCategoryOptions.mixWithOthers
+          ],
+          IosTextToSpeechAudioMode.defaultMode
+      );
     }
   }
   changeLanguage(LanguageItem languageItem) async
@@ -139,11 +150,12 @@ class TextToSpeechControl extends ChangeNotifier{
     // await flutterTts.setVoice(maleVoiceMap);
   }
   speak(String str, bool useWaiting) async {
+
     if(Platform.isIOS){
-      await audioSetting(Platform.isIOS);
-      await Future.delayed(const Duration(milliseconds: 1000));
+      await audioSpeakMode(true);
       await flutterTts.speak(str);
       await flutterTts.awaitSpeakCompletion(useWaiting);
+      await audioSpeakMode(false);
     }
     else{
       await flutterTts.speak(str);

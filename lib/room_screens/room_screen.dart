@@ -25,7 +25,6 @@ class RoomScreen extends StatefulWidget {
 }
 
 class _RoomScreenState extends State<RoomScreen> {
-  final TextToSpeechControl _textToSpeechControl = TextToSpeechControl();
   final _authProvider = AuthProvider.instance;
   final _chatProvider = ChatProvider.instance;
   final LanguageSelectControl _languageSelectControl = LanguageSelectControl.instance;
@@ -37,10 +36,19 @@ class _RoomScreenState extends State<RoomScreen> {
   bool isRoomDisplayerOpen = false;
   Stream<UserModel>? _hostStream;
 
+  @override
+  void deactivate() {
+    // 작업 수행
+    // 다른 위젯이 현재 위젯을 덮을 때
+    // 전체 화면 다이얼로그 또는 알림이 표시될 때
+    // 앱이 백그라운드로 이동할 때
+    // 다른 위젯으로 전환되거나 앱이 종료될 때
+    print("앱이 비활성화됨");
+    super.deactivate();
+  }
   initializeChatRoom() async {
     UserModel userModel = UserModel.fromFirebaseUser(_authProvider.curUser!);
 
-    _textToSpeechControl.initTextToSpeech(_languageSelectControl.myLanguageItem);
     //참가 처리
     final isJoined = await widget.chatRoomToLoad!.joinRoom(userModel);
     sayneToast("방 로드 ${isJoined ? "성공" : "실패"}");
