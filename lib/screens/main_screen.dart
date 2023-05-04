@@ -1,14 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:transpresentation/helper/colors.dart';
 import 'package:transpresentation/screens/room_selecting_page.dart';
-import 'package:transpresentation/testing/tmp_page.dart';
 
-import '../classes/auth_provider.dart';
-import '../classes/chat_provider.dart';
+import '../managers/auth_provider.dart';
+import '../managers/chat_provider.dart';
 import '../classes/chat_room.dart';
-import '../classes/user_model.dart';
-import '../room_screens/room_screen.dart';
-import '../room_screens/room_title_setting_page.dart';
+import 'room_screen.dart';
+import '../screen_pages/room_title_setting_page.dart';
 import 'my_friends_page.dart';
 class MainScreen extends StatefulWidget {
   @override
@@ -26,7 +28,6 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   late AnimationController _animationController;
   late Animation<Offset> _animation;
   final List<Widget> _widgetOptions = <Widget>[    MyFriendsPage(),    RoomSelectingPage(),  ];
-
 
   void _onTabSelected(MainScreenTab tab) {
     setState(() {
@@ -55,11 +56,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
     super.initState();
     // 변경된 부분
     _currentTab = MainScreenTab.chats;
+    // Create an instance of the InternetConnectionStatusService
+
   }
   @override
   void dispose() {
     // TODO: implement dispose
     _animationController.dispose();
+
     super.dispose();
   }
 
@@ -93,8 +97,12 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
               ),
           ],
         ),
-        body: Center(
-          child: _widgetOptions.elementAt(_currentTab.index),
+        body: Stack(
+          children: [
+            Center(
+              child: _widgetOptions.elementAt(_currentTab.index),
+            ),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[

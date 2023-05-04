@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:transpresentation/classes/auth_provider.dart';
+import 'package:transpresentation/managers/auth_provider.dart';
 
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
-import '../room_screens/profile_circle.dart';
+import '../custom_widget/profile_circle.dart';
 
 class RoomDisplayer extends StatefulWidget {
   const RoomDisplayer({required this.chatRoom, Key? key}) : super(key: key);

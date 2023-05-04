@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:google_cloud_translation/google_cloud_translation.dart';
 
 class TranslateByGoogleServer {
-  final String apiKey = "AIzaSyBlraqGv_3DXKqEsUD3Pce8sTPEzLbRb6U";
+  final String apiKey = "AIzaSyDXxemdLQyI3VzOG2Guqhm7JpDcoKFWPhI";
   late Translation _translation;
 
   initializeTranslateByGoogleServer() {

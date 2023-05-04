@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:transpresentation/room_screens/profile_circle.dart';
+import 'package:transpresentation/custom_widget/profile_circle.dart';
 
 import '../classes/user_model.dart';
 

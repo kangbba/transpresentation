@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:transpresentation/helper/colors.dart';
 
-import '../classes/auth_provider.dart';
+import '../managers/auth_provider.dart';
 import '../helper/sayne_dialogs.dart';
 
 class ChangingNicknameScreen extends StatefulWidget {

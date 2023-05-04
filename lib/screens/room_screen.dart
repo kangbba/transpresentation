@@ -1,22 +1,24 @@
+
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:transpresentation/helper/colors.dart';
 import 'package:transpresentation/helper/sayne_dialogs.dart';
-import 'package:transpresentation/room_screens/presenter_page.dart';
-import 'package:transpresentation/room_screens/profile_circle.dart';
-import 'package:transpresentation/room_screens/user_speakspeed_slider.dart';
+import 'package:transpresentation/screen_pages/presenter_page.dart';
+import 'package:transpresentation/custom_widget/profile_circle.dart';
+import 'package:transpresentation/custom_widget/user_speakspeed_slider.dart';
 
 import '../apis/text_to_speech_control.dart';
-import '../classes/auth_provider.dart';
-import '../classes/chat_provider.dart';
+import '../managers/auth_provider.dart';
+import '../managers/chat_provider.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/user_model.dart';
 import '../helper/sayne_separator.dart';
-import '../screens/language_select_screen.dart';
-import 'audience_page.dart';
-import '../screens/room_displayer.dart';
+import 'language_select_screen.dart';
+import '../screen_pages/audience_page.dart';
+import '../screen_pages/room_displayer.dart';
 class RoomScreen extends StatefulWidget {
   RoomScreen({Key? key, required this.chatRoomToLoad}) : super(key: key);
   ChatRoom chatRoomToLoad;
@@ -76,6 +78,14 @@ class _RoomScreenState extends State<RoomScreen> {
     // TODO: implement initState
     super.initState();
     initializeChatRoom();
+    // _authProvider.googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+    //   if(account == null){
+    //     print("로그아웃 됨");
+    //   }
+    //   else{
+    //     print("로그아웃 됨");
+    //   }
+    // });
 
   }
   @override
@@ -330,4 +340,5 @@ class _RoomScreenState extends State<RoomScreen> {
       },
     );
   }
+
 }

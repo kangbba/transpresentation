@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:transpresentation/classes/user_model.dart';
 import 'package:transpresentation/helper/sayne_separator.dart';
-import 'package:transpresentation/room_screens/profile_circle.dart';
-import 'package:transpresentation/room_screens/title_input_screen.dart';
-import '../classes/auth_provider.dart';
+import 'package:transpresentation/custom_widget/profile_circle.dart';
+import 'package:transpresentation/screens/title_input_screen.dart';
+import '../managers/auth_provider.dart';
 
 class RoomTitleSettingPage extends StatefulWidget {
   const RoomTitleSettingPage({super.key});

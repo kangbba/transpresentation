@@ -7,7 +7,7 @@ import 'package:transpresentation/classes/statics.dart';
 import 'package:transpresentation/testing/message.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
-import 'chat_room.dart';
+import '../classes/chat_room.dart';
 import '../helper/sayne_dialogs.dart';
 
 

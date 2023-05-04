@@ -13,8 +13,7 @@ import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/presentation.dart';
 import '../screens/language_select_screen.dart';
-import 'auto_scrollable_text.dart';
-import 'content_pages.dart';
+import '../custom_widget/auto_scrollable_text.dart';
 
 class AudiencePage extends StatefulWidget {
   final ChatRoom chatRoom;

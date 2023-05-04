@@ -3,14 +3,14 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:transpresentation/classes/auth_provider.dart';
-import 'package:transpresentation/classes/chat_provider.dart';
+import 'package:transpresentation/managers/auth_provider.dart';
+import 'package:transpresentation/managers/chat_provider.dart';
 
 import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
-import '../room_screens/profile_circle.dart';
-import '../room_screens/profile_circle_stack.dart';
-import '../room_screens/room_screen.dart';
+import '../custom_widget/profile_circle.dart';
+import '../testing/profile_circle_stack.dart';
+import 'room_screen.dart';
 
 class RoomSelectingPage extends StatefulWidget {
   const RoomSelectingPage({Key? key}) : super(key: key);
