@@ -5,10 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
-import 'package:transpresentation/apis/text_to_speech_control.dart';
-import 'package:transpresentation/helper/sayne_separator.dart';
+import 'package:transpresentation/managers/text_to_speech_control.dart';
+import 'package:transpresentation/custom_widget/sayne_separator.dart';
 
-import '../apis/translate_by_googleserver.dart';
+import '../managers/translate_by_googleserver.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/presentation.dart';

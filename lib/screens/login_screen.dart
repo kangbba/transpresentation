@@ -4,7 +4,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/managers/auth_provider.dart';
-import 'package:transpresentation/helper/sayne_dialogs.dart';
+import 'package:transpresentation/custom_widget/sayne_dialogs.dart';
 import 'package:transpresentation/screens/changing_nickname_screen.dart';
 import 'package:transpresentation/screens/room_screen.dart';
 import 'package:transpresentation/screens/main_screen.dart';

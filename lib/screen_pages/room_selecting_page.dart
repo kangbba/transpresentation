@@ -10,7 +10,7 @@ import '../classes/chat_room.dart';
 import '../classes/user_model.dart';
 import '../custom_widget/profile_circle.dart';
 import '../testing/profile_circle_stack.dart';
-import 'room_screen.dart';
+import '../screens/room_screen.dart';
 
 class RoomSelectingPage extends StatefulWidget {
   const RoomSelectingPage({Key? key}) : super(key: key);
