@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:transpresentation/classes/user_model.dart';
-import 'package:transpresentation/helper/sayne_separator.dart';
+import 'package:transpresentation/custom_widget/sayne_separator.dart';
 import 'package:transpresentation/custom_widget/profile_circle.dart';
 import 'package:transpresentation/screens/title_input_screen.dart';
 import '../managers/auth_provider.dart';

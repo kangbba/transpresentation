@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:transpresentation/apis/text_to_speech_control.dart';
-import 'package:transpresentation/helper/sayne_separator.dart';
+import 'package:transpresentation/managers/text_to_speech_control.dart';
+import 'package:transpresentation/custom_widget/sayne_separator.dart';
 
 import '../classes/language_select_control.dart';
 

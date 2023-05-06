@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/screens/login_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:transpresentation/apis/speech_to_text_control.dart';
+import 'package:transpresentation/managers/speech_to_text_control.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();

@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_cloud_translation/google_cloud_translation.dart';
-import 'package:transpresentation/apis/translate_by_googleserver.dart';
+import 'package:transpresentation/managers/translate_by_googleserver.dart';
 
 class TmpPage extends StatefulWidget {
   @override

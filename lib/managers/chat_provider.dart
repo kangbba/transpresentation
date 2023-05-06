@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:transpresentation/classes/statics.dart';
+import 'package:transpresentation/helper/statics.dart';
 import 'package:transpresentation/testing/message.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
 import '../classes/chat_room.dart';
-import '../helper/sayne_dialogs.dart';
+import '../custom_widget/sayne_dialogs.dart';
 
 
 class ChatProvider with ChangeNotifier {

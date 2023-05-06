@@ -5,9 +5,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:transpresentation/classes/presentation.dart';
-import 'package:transpresentation/classes/statics.dart';
-import 'package:transpresentation/classes/statics.dart';
-import 'package:transpresentation/helper/sayne_dialogs.dart';
+import 'package:transpresentation/helper/statics.dart';
+import 'package:transpresentation/helper/statics.dart';
+import 'package:transpresentation/custom_widget/sayne_dialogs.dart';
 import 'package:transpresentation/classes/user_model.dart';
 
 import '../exceptions/chat_room_exception.dart';

@@ -4,10 +4,10 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:simple_ripple_animation/simple_ripple_animation.dart';
-import 'package:transpresentation/apis/speech_to_text_control.dart';
+import 'package:transpresentation/managers/speech_to_text_control.dart';
 import 'package:transpresentation/managers/auth_provider.dart';
-import 'package:transpresentation/helper/sayne_dialogs.dart';
-import '../apis/text_to_speech_control.dart';
+import 'package:transpresentation/custom_widget/sayne_dialogs.dart';
+import '../managers/text_to_speech_control.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 

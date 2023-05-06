@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:transpresentation/helper/colors.dart';
-import 'package:transpresentation/screens/room_selecting_page.dart';
+import 'package:transpresentation/screen_pages/room_selecting_page.dart';
 
 import '../managers/auth_provider.dart';
 import '../managers/chat_provider.dart';
 import '../classes/chat_room.dart';
 import 'room_screen.dart';
 import '../screen_pages/room_title_setting_page.dart';
-import 'my_friends_page.dart';
+import '../screen_pages/my_friends_page.dart';
 class MainScreen extends StatefulWidget {
   @override
   _MainScreenState createState() => _MainScreenState();

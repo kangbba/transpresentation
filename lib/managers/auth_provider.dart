@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:transpresentation/helper/sayne_dialogs.dart';
+import 'package:transpresentation/custom_widget/sayne_dialogs.dart';
 
 import '../classes/user_model.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../helper/sayne_separator.dart';
+import 'sayne_separator.dart';
 
 class AutoScrollableText extends StatefulWidget {
   final String content;
