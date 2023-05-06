@@ -1,14 +1,16 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:transpresentation/custom_widget/sayne_dialogs.dart';
 import 'package:transpresentation/helper/colors.dart';
+import 'package:transpresentation/managers/network_checking_service.dart';
 import 'package:transpresentation/screen_pages/room_selecting_page.dart';
 
 import '../managers/auth_provider.dart';
 import '../managers/chat_provider.dart';
 import '../classes/chat_room.dart';
+import '../screen_pages/translation_page.dart';
 import 'room_screen.dart';
 import '../screen_pages/room_title_setting_page.dart';
 import '../screen_pages/my_friends_page.dart';
@@ -19,15 +21,18 @@ class MainScreen extends StatefulWidget {
 enum MainScreenTab {
   friends,
   chats,
+  translation,
 }
 
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
+
+  NetworkCheckingService networkCheckingService = NetworkCheckingService();
   final _chatProvider = ChatProvider.instance;
   final _authProvider = AuthProvider.instance;
   MainScreenTab _currentTab = MainScreenTab.chats;
   late AnimationController _animationController;
   late Animation<Offset> _animation;
-  final List<Widget> _widgetOptions = <Widget>[    MyFriendsPage(),    RoomSelectingPage(),  ];
+  final List<Widget> _widgetOptions = <Widget>[    MyFriendsPage(), RoomSelectingPage(), TranslationPage() ];
 
   void _onTabSelected(MainScreenTab tab) {
     setState(() {
@@ -39,6 +44,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   @override
   void initState() {
     // TODO: implement initState
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -77,6 +83,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
       case MainScreenTab.chats:
         tabTitle = "Classrooms";
         break;
+      case MainScreenTab.translation:
+        tabTitle = "Translation";
+        break;
     }
     return WillPopScope(
       onWillPop: () async {
@@ -97,10 +106,36 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
               ),
           ],
         ),
-        body: Stack(
+        body: Column(
           children: [
-            Center(
-              child: _widgetOptions.elementAt(_currentTab.index),
+            StreamBuilder<bool>(
+              stream: networkCheckingService.getInternetAvailabilityStream(),
+              builder: (context, snapshot) {
+                if(snapshot.data == null || snapshot.data! == false){
+                  return SizedBox(
+                    height: 50,
+                    child: Container(
+                      color: Colors.black12,
+                      child: Center(
+                        child: Text(
+                          "네트워크 연결 상태를 확인해주세요",
+                          style: const TextStyle(
+                            fontSize: 13.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }
+                else{
+                  return Container(height: 0);
+                }
+              }
+            ),
+            Expanded(
+              child: Center(
+                child: _widgetOptions.elementAt(_currentTab.index),
+              ),
             ),
           ],
         ),
@@ -114,6 +149,10 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
               icon: Icon(Icons.chat_bubble),
               label: 'Chats',
             ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.translate),
+              label: 'Translation',
+            ),
           ],
           currentIndex: _currentTab.index,
           onTap: (index) {
@@ -125,6 +164,11 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin{
   }
 
   void onPressedCreateChatRoomBtn() async{
+    bool networkAvailable = await networkCheckingService.isInternetConnectionAvailable();
+    if(!networkAvailable){
+      await sayneConfirmDialog(context, "", "네트워크 상태를 확인해주세요");
+      return;
+    }
     _animationController.reset();
     _animationController.forward();
     String? roomTitle = await showDialog<String>(

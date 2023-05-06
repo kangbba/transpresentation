@@ -51,6 +51,7 @@ dependencies:
   flutter_network_connectivity: ^0.0.6
 
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
