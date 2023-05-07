@@ -1,13 +1,20 @@
 import 'dart:async';
-import 'dart:ffi';
+import 'dart:ui';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_ripple_animation/simple_ripple_animation.dart';
 import 'package:transpresentation/managers/text_to_speech_control.dart';
 import 'package:transpresentation/custom_widget/sayne_separator.dart';
+import 'package:transpresentation/screen_pages/presenter_page.dart';
 
+import '../custom_widget/sayne_dialogs.dart';
+import '../managers/auth_provider.dart';
+import '../managers/chat_provider.dart';
+import '../managers/speech_to_text_control.dart';
 import '../managers/translate_by_googleserver.dart';
 import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
@@ -24,9 +31,65 @@ class TranslationPage extends StatefulWidget {
 
 class _TranslationPageState extends State<TranslationPage> {
 
+  SpeechToTextControl speechToTextControl = SpeechToTextControl();
+  final _authProvider = AuthProvider.instance;
+  final _chatProvider = ChatProvider.instance;
+
+  ListeningRoutineState listeningRoutineState = ListeningRoutineState.offRecognizing;
+  bool recordBtnState = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    return Text("Translate");
+    return _audioRecordBtn();
+  }
+
+  Widget _audioRecordBtn() {
+    return
+      RippleAnimation(
+          color: Colors.blue,
+          delay: const Duration(milliseconds: 200),
+          repeat: true,
+          minRadius: recordBtnState ? 35 : 0,
+          ripplesCount: 8,
+          duration: const Duration(milliseconds: 6 * 300),
+          child:ElevatedButton(
+            style: ButtonStyle(
+              minimumSize: MaterialStateProperty.all(Size(55, 55)),
+              shape: MaterialStateProperty.all(CircleBorder()),
+              backgroundColor: MaterialStateProperty.all(Colors.redAccent[200] ),
+            ),
+            onPressed: () async {
+              setState(() {
+                if (Platform.isAndroid) {
+                  sayneToast("해당 기기는 발표자를 지원하지 않습니다");
+                  return;
+                }
+                recordBtnState = !recordBtnState;
+                if(recordBtnState){
+                  listeningLoopingRoutine();
+                }
+                else{
+                }
+              });
+            },
+            child: recordBtnState ? LoadingAnimationWidget.staggeredDotsWave(size: 33, color: Colors.white) : Icon(Icons.mic, color:  Colors.white, size: 33,),
+          )
+      ) ;
+  }
+  listeningLoopingRoutine() async{
+
+  }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    recordBtnState = false;
+    super.dispose();
   }
 
 }

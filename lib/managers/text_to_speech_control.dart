@@ -98,28 +98,16 @@ class TextToSpeechControl extends ChangeNotifier{
     Map<String, String> selectedVoice;
     String ttsVoiceCode = Platform.isIOS ? languageItem.iosTtsVoice : languageItem.androidTtsVoice;
     if(Platform.isIOS){
-      // if(ttsVoiceCode!.isEmpty){
-      //   selectedVoice = {
-      //     'name': availableVoices.first['name'],
-      //     'locale': availableVoices.first['locale'],
-      //   };
-      //   print("커스텀한 정보가 없으므로, 첫 정보로 selected : $selectedVoice");
-      // }
-      // else{
-      //   selectedVoice = {
-      //     'name': ttsVoiceCode,
-      //     'locale': manipulatedLangCode,
-      //   };
-      //   print("커스텀 정보 있으므로, 그 정보로 selected : $selectedVoice");
-      // }
     }
     else{
+      print(availableVoices);
       if(ttsVoiceCode!.isEmpty){
         selectedVoice = {
-          'name': availableVoices.last['name'],
-          'locale': availableVoices.last['locale'],
+          'name': availableVoices.first['name'],
+          'locale': availableVoices.first['locale'],
         };
         print("해당 정보 없으므로, 마지막 정보로 selected : $selectedVoice");
+        await flutterTts.setVoice(selectedVoice);
       }
       else{
         selectedVoice = {

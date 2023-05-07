@@ -16,6 +16,7 @@ import '../classes/chat_room.dart';
 import '../classes/language_select_control.dart';
 import '../classes/user_model.dart';
 import '../custom_widget/sayne_separator.dart';
+import '../screen_pages/language_select_screen_btn.dart';
 import 'language_select_screen.dart';
 import '../screen_pages/audience_page.dart';
 import '../screen_pages/room_displayer.dart';
@@ -185,7 +186,7 @@ class _RoomScreenState extends State<RoomScreen> {
                     const SayneSeparator(color: Colors.black54, height: 0.3, top: 8, bottom: 16),
                     SizedBox(
                       height: 60,
-                      child: languageSelectScreenBtn(isCurUserHost),
+                      child: LanguageSelectScreenButton(isHost: isCurUserHost,),
                     )
                   ],
                 ),
